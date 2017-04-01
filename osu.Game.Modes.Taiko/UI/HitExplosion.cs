@@ -18,12 +18,13 @@ namespace osu.Game.Modes.Taiko.UI
     /// </summary>
     internal class HitExplosion : CircularContainer
     {
-        private readonly TaikoJudgement judgement;
+        public readonly TaikoJudgement Judgement;
+
         private readonly Box innerFill;
 
         public HitExplosion(TaikoJudgement judgement)
         {
-            this.judgement = judgement;
+            Judgement = judgement;
 
             Size = new Vector2(TaikoHitObject.CIRCLE_RADIUS * 2);
 
@@ -50,10 +51,7 @@ namespace osu.Game.Modes.Taiko.UI
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            if (judgement.SecondHit)
-                Size *= 1.5f;
-
-            switch (judgement.TaikoResult)
+            switch (Judgement.TaikoResult)
             {
                 case TaikoHitResult.Good:
                     innerFill.Colour = colours.Green;
@@ -72,6 +70,11 @@ namespace osu.Game.Modes.Taiko.UI
             FadeOut(500);
 
             Expire();
+        }
+
+        public void AddSecondHit()
+        {
+            ResizeTo(Size * 1.5f, 50);
         }
     }
 }
