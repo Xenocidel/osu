@@ -5,6 +5,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.MathUtils;
 using osu.Framework.Testing;
+using osu.Framework.Timing;
 using osu.Game.Modes.Objects.Drawables;
 using osu.Game.Modes.Taiko.Judgements;
 using osu.Game.Modes.Taiko.Objects;
@@ -19,6 +20,11 @@ namespace osu.Desktop.VisualTests.Tests
 
         private TaikoPlayfield playfield;
 
+        public TestCaseTaikoPlayfield()
+        {
+            Clock = new FramedClock();
+        }
+
         public override void Reset()
         {
             base.Reset();
@@ -32,6 +38,7 @@ namespace osu.Desktop.VisualTests.Tests
             AddStep("Strong Centre", () => addCentreHit(true));
             AddStep("Rim", () => addRimHit(false));
             AddStep("Strong Rim", () => addRimHit(true));
+            AddStep("Add bar line", addBarLine);
 
             Add(new Container
             {
@@ -73,6 +80,19 @@ namespace osu.Desktop.VisualTests.Tests
             });
         }
 
+        private void addBarLine()
+        {
+            bool isMajor = RNG.Next(8) == 0;
+
+            BarLine bl = new BarLine
+            {
+                StartTime = Time.Current + 1000,
+                PreEmpt = 1000
+            };
+
+            playfield.AddBarLine(isMajor ? new DrawableMajorBarLine(bl) : new DrawableBarLine(bl));
+        }
+        
         private void addDrumRoll(bool strong)
         {
             var d = new DrumRoll

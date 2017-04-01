@@ -53,6 +53,9 @@
     <Compile Include="Judgements\TaikoStrongHitJudgement.cs" />
     <Compile Include="Judgements\TaikoJudgement.cs" />
     <Compile Include="Judgements\TaikoHitResult.cs" />
+    <Compile Include="Objects\BarLine.cs" />
+    <Compile Include="Objects\Drawable\DrawableBarLine.cs" />
+    <Compile Include="Objects\Drawable\DrawableMajorBarLine.cs" />
     <Compile Include="Objects\CentreHit.cs" />
     <Compile Include="Objects\Drawable\DrawableRimHit.cs" />
     <Compile Include="Objects\Drawable\DrawableStrongRimHit.cs" />

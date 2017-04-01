@@ -40,7 +40,7 @@ namespace osu.Game.Modes.Taiko.UI
         protected override Container<Drawable> Content => hitObjectContainer;
 
         private readonly Container<HitExplosion> hitExplosionContainer;
-        //private Container<DrawableBarLine> barLineContainer;
+        private readonly Container<DrawableBarLine> barLineContainer;
         private readonly Container<DrawableTaikoJudgement> judgementContainer;
 
         private readonly Container hitObjectContainer;
@@ -96,10 +96,10 @@ namespace osu.Game.Modes.Taiko.UI
                                     Size = new Vector2(TaikoHitObject.CIRCLE_RADIUS * 2),
                                     BlendingMode = BlendingMode.Additive
                                 },
-                                //barLineContainer = new Container<DrawableBarLine>
-                                //{
-                                //    RelativeSizeAxes = Axes.Both,
-                                //},
+                                barLineContainer = new Container<DrawableBarLine>
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                },
                                 new HitTarget
                                 {
                                     Anchor = Anchor.CentreLeft,
@@ -172,6 +172,11 @@ namespace osu.Game.Modes.Taiko.UI
             var swell = h as DrawableSwell;
             if (swell != null)
                 swell.OnStart += () => topLevelHitContainer.Add(swell.CreateProxy());
+        }
+
+        public void AddBarLine(DrawableBarLine barLine)
+        {
+            barLineContainer.Add(barLine);
         }
 
         public override void OnJudgement(DrawableHitObject<TaikoHitObject, TaikoJudgement> judgedObject)
