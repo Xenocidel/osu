@@ -15,6 +15,7 @@ namespace osu.Game.Modes.Taiko.Objects.Drawable
         public DrawableStrongCentreHit(Hit hit)
             : base(hit)
         {
+            Circle.Add(new CentreHitSymbolPiece());
         }
 
         [BackgroundDependencyLoader]
