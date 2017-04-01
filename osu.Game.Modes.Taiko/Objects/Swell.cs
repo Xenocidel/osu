@@ -12,6 +12,8 @@ namespace osu.Game.Modes.Taiko.Objects
     {
         public double EndTime { get; set; }
 
+        public double HitRatio { get; set; } = 1;
+
         public double Duration => EndTime - StartTime;
 
         /// <summary>
@@ -24,7 +26,7 @@ namespace osu.Game.Modes.Taiko.Objects
             base.ApplyDefaults(timing, difficulty);
 
             double spinnerRotationRatio = BeatmapDifficulty.DifficultyRange(difficulty.OverallDifficulty, 3, 5, 7.5);
-            RequiredHits = (int)Math.Max(1, Duration / 1000f * spinnerRotationRatio);
+            RequiredHits = (int)Math.Max(1, Duration / 1000f * spinnerRotationRatio * HitRatio);
         }
     }
 }
