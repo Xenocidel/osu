@@ -13,6 +13,7 @@ using osu.Game.Modes.Taiko.Replays;
 using osu.Game.Modes.Taiko.Objects.Drawable;
 using osu.Game.Modes.Taiko.Scoring;
 using osu.Game.Modes.UI;
+using osu.Game.Screens.Play;
 
 namespace osu.Game.Modes.Taiko.UI
 {
@@ -40,16 +41,18 @@ namespace osu.Game.Modes.Taiko.UI
             var hit = h as Hit;
             if (hit != null)
             {
-                switch (hit.Type)
+                if (hit is CentreHit)
                 {
-                    case HitType.Centre:
-                        if (h.IsStrong)
-                            return new DrawableStrongCentreHit(hit);
-                        return new DrawableCentreHit(hit);
-                    case HitType.Rim:
-                        if (h.IsStrong)
-                            return new DrawableStrongRimHit(hit);
-                        return new DrawableRimHit(hit);
+                    if (h.IsStrong)
+                        return new DrawableStrongCentreHit(hit);
+                    return new DrawableCentreHit(hit);
+                }
+
+                if (h is RimHit)
+                {
+                    if (h.IsStrong)
+                        return new DrawableStrongRimHit(hit);
+                    return new DrawableRimHit(hit);
                 }
             }
 
@@ -67,5 +70,7 @@ namespace osu.Game.Modes.Taiko.UI
 
             return null;
         }
+
+        protected override FramedReplayInputHandler CreateReplayInputHandler(Replay replay) => new TaikoFramedReplayInputHandler(replay);
     }
 }
