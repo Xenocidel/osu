@@ -64,8 +64,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         internal class StarCounter : Container, IHasAccentColour
         {
-            private readonly Container<Star> starContainer;
-            private readonly Container<ProxyDrawable> topMostStars;
+            private readonly FlowContainer<Star> starContainer;
+            private readonly Container<ProxyDrawable> overlayLayer;
 
             private Dictionary<Star, ProxyDrawable> proxyMap = new Dictionary<Star, ProxyDrawable>();
 
@@ -75,11 +75,11 @@ namespace osu.Desktop.VisualTests.Tests
 
                 Children = new Drawable[]
                 {
-                    starContainer = new Container<Star>
+                    starContainer = new FillFlowContainer<Star>
                     {
                         AutoSizeAxes = Axes.Both
                     },
-                    topMostStars = new Container<ProxyDrawable>
+                    overlayLayer = new Container<ProxyDrawable>
                     {
                         RelativeSizeAxes = Axes.Both
                     }
@@ -118,23 +118,11 @@ namespace osu.Desktop.VisualTests.Tests
                             {
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
-                                AccentColour = AccentColour,
-                                X = Star.STAR_SIZE * i,
-                            };
-
-                            newStar.AnimationStart = () =>
-                            {
-                                // Remove any existing proxy
-                                ProxyDrawable existing;
-                                if (proxyMap.TryGetValue(newStar, out existing))
-                                    topMostStars.Remove(existing);
-                                else
-                                    existing = proxyMap[newStar] = newStar.CreateProxy();
-
-                                topMostStars.Add(existing);
+                                AccentColour = AccentColour
                             };
 
                             starContainer.Add(newStar);
+                            overlayLayer.Add(newStar.CreateOverlayProxy());
                         }
                     }
                     else
@@ -196,9 +184,6 @@ namespace osu.Desktop.VisualTests.Tests
                 public const float STAR_SIZE = 40f;
                 private const float glow_sigma = 10f;
 
-                public Action AnimationStart;
-                public Action AnimationEnd;
-
                 private readonly Container filledStarContainer;
                 private readonly TextAwesome baseStar;
                 private readonly BufferedContainer filledStarGlow;
@@ -222,6 +207,7 @@ namespace osu.Desktop.VisualTests.Tests
                             Origin = Anchor.Centre,
                             AutoSizeAxes = Axes.Both,
                             Scale = new Vector2(0.001f), // Todo: Fix broken size (NaN?)
+                            BypassAutoSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
                                 filledStarGlow = new BufferedContainer
@@ -251,7 +237,7 @@ namespace osu.Desktop.VisualTests.Tests
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     Icon = FontAwesome.fa_star,
-                                    TextSize = STAR_SIZE,
+                                    TextSize = STAR_SIZE
                                 }
                             }
                         }
@@ -269,6 +255,7 @@ namespace osu.Desktop.VisualTests.Tests
                         accentColour = value;
 
                         baseStar.Colour = accentColour;
+                        filledStarGlow.Colour = accentColour;
                     }
                 }
 
@@ -287,8 +274,6 @@ namespace osu.Desktop.VisualTests.Tests
 
                         if (isFilled)
                         {
-                            AnimationStart?.Invoke();
-
                             filledStarContainer.ScaleTo(2f, 300, EasingTypes.OutBack);
 
                             Delay(200, true);
@@ -297,12 +282,16 @@ namespace osu.Desktop.VisualTests.Tests
 
                             Delay(3000, true);
                             filledStarGlow.FadeOut(400, EasingTypes.OutCubic);
+
+                            Delay(100, true);
                             filledStarContainer.ScaleTo(1, 300, EasingTypes.InBack);
                         }
                         else
                             filledStarContainer.ScaleTo(0, 200);
                     }
                 }
+
+                public ProxyDrawable CreateOverlayProxy() => filledStarContainer.CreateProxy();
             }
         }
     }
