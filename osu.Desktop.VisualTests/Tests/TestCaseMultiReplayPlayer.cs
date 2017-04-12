@@ -76,9 +76,6 @@ namespace osu.Desktop.VisualTests.Tests
                         Direction = StarCounterDirection.RightToLeft
                     },
                     new PlayerContainer(4)
-                    {
-                        Position = new Vector2(0, 135)
-                    }
                 };
 
                 backgroundSprite.Texture = textures.Get(@"Backgrounds/Tournament/background");
@@ -88,35 +85,57 @@ namespace osu.Desktop.VisualTests.Tests
             }
         }
 
-        internal class PlayerContainer : FillFlowContainer
+        internal class PlayerContainer : Container
         {
+            private const float players_start = 95;
+            private const float players_height = 480;
+
             private FlowContainer<Player> bluePlayers;
             private FlowContainer<Player> redPlayers;
 
             public PlayerContainer(int playersPerTeam)
             {
-                RelativeSizeAxes = Axes.X;
+                RelativeSizeAxes = Axes.Both;
 
-                Children = new[]
+                Children = new Drawable[]
                 {
-                    bluePlayers = new FillFlowContainer<Player>()
+                    new Container
                     {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y
+                        Name = "Blue team column",
+                        RelativeSizeAxes = Axes.Both,
+                        Width = 0.5f,
+                        Masking = true,
+                        Children = new[]
+                        {
+                            bluePlayers = new FillFlowContainer<Player>()
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Height = players_height,
+                                Y = players_start,
+                                Spacing = new Vector2(0, 14)
+                            },
+                        }
                     },
-                    redPlayers = new FillFlowContainer<Player>()
+                    new Container
                     {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y
+                        Name = "Red team column",
+                        RelativePositionAxes = Axes.X,
+                        RelativeSizeAxes = Axes.Both,
+                        Width = 0.5f,
+                        X = 0.5f,
+                        Masking = true,
+                        Children = new[]
+                        {
+                            redPlayers = new FillFlowContainer<Player>()
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Height = players_height,
+                                Y = players_start,
+                                Spacing = new Vector2(0, 14)
+                            }
+                        }
                     }
                 };
-
-                if (playersPerTeam > 2)
-                {
-                    // Tile teams horizontally
-                    bluePlayers.Width = 0.5f;
-                    redPlayers.Width = 0.5f;
-                }
 
                 for (int i = 0; i < playersPerTeam; i++)
                 {
@@ -128,6 +147,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         internal class Player : Container
         {
+            private const float player_height = 110;
+
             private readonly HitRenderer hitRenderer;
             private readonly HudOverlay hudOverlay;
             private readonly ScoreProcessor scoreProcessor;
@@ -135,7 +156,7 @@ namespace osu.Desktop.VisualTests.Tests
             public Player(bool teamRed)
             {
                 RelativeSizeAxes = Axes.X;
-                Height = 140;
+                Height = player_height;
 
                 Ruleset ruleset = Ruleset.GetRuleset(PlayMode.Taiko);
 
