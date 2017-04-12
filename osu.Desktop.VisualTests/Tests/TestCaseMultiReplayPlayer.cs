@@ -221,15 +221,10 @@ namespace osu.Desktop.VisualTests.Tests
                 set
                 {
                     playerName = value;
-                    nameTextGlow.Text = value;
                     nameText.Text = value;
-
-                    nameTextGlowContainer.ForceRedraw();
                 }
             }
 
-            private readonly BufferedContainer nameTextGlowContainer;
-            private readonly OsuSpriteText nameTextGlow;
             private readonly OsuSpriteText nameText;
 
             private readonly bool teamRed;
@@ -244,25 +239,6 @@ namespace osu.Desktop.VisualTests.Tests
                     Position = new Vector2(35, 0),
                     Children = new Drawable[]
                     {
-                        nameTextGlowContainer = new BufferedContainer
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            AutoSizeAxes = Axes.Both,
-                            BlurSigma = new Vector2(3f),
-                            CacheDrawnFrameBuffer = true,
-                            BypassAutoSizeAxes = Axes.Both,
-                            Scale = new Vector2(1.05f),
-                            Children = new[]
-                            {
-                                nameTextGlow = new OsuSpriteText
-                                {
-                                    TextSize = 14,
-                                    Font = "Exo2.0-RegularItalic",
-                                    Text = "Name here"
-                                }
-                            }
-                        },
                         nameText = new OsuSpriteText
                         {
                             TextSize = 14,
@@ -292,13 +268,9 @@ namespace osu.Desktop.VisualTests.Tests
                     hd.GlowColour = colours.PinkDarker;
 
                     nameText.Colour = colours.PinkLighter;
-                    nameTextGlow.Colour = colours.PinkDarker;
                 }
                 else
-                {
                     nameText.Colour = colours.BlueLighter;
-                    nameTextGlow.Colour = colours.BlueDarker;
-                }
             }
         }
 
