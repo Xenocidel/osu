@@ -28,37 +28,48 @@ namespace osu.Desktop.VisualTests.Tests
             base.Reset();
 
             Add(new MultiReplayPlayer());
-
-            Add(new StarCounter
-            {
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                MaxCount = 10,
-                Count = 5
-            });
         }
 
         internal class MultiReplayPlayer : OsuScreen
         {
             protected override BackgroundScreen CreateBackground() => new BackgroundScreenDefault();
 
+            private readonly StarCounter blueStarCounter;
+            private readonly StarCounter redStarCounter;
             private readonly Sprite backgroundSprite;
 
             public MultiReplayPlayer()
             {
-                Children = new[]
+                Children = new Drawable[]
                 {
                     backgroundSprite = new Sprite
                     {
                         FillMode = FillMode.Fill
+                    },
+                    blueStarCounter = new StarCounter
+                    {
+                        Origin = Anchor.CentreLeft,
+                        Position = new Vector2(95, 75),
+                        MaxCount = 3
+                    },
+                    redStarCounter = new StarCounter
+                    {
+                        Anchor = Anchor.TopRight,
+                        Origin = Anchor.CentreRight,
+                        Position = new Vector2(-95, 75),
+                        MaxCount = 3,
+                        Direction = StarCounterDirection.RightToLeft
                     }
                 };
             }
 
             [BackgroundDependencyLoader]
-            private void load(TextureStore textures)
+            private void load(TextureStore textures, OsuColour colours)
             {
                 backgroundSprite.Texture = textures.Get(@"Backgrounds/Tournament/background");
+
+                blueStarCounter.AccentColour = colours.Blue;
+                redStarCounter.AccentColour = colours.Red;
             }
         }
 
@@ -100,6 +111,22 @@ namespace osu.Desktop.VisualTests.Tests
                 }
             }
 
+            private StarCounterDirection direction;
+            public StarCounterDirection Direction
+            {
+                get { return direction; }
+                set
+                {
+                    direction = value;
+
+                    starContainer.Children.ForEach(c =>
+                    {
+                        c.Anchor = direction == StarCounterDirection.LeftToRight ? Anchor.TopLeft : Anchor.TopRight;
+                        c.Origin = direction == StarCounterDirection.LeftToRight ? Anchor.TopLeft : Anchor.TopRight;
+                    });
+                }
+            }
+
             private int maxCount;
             public int MaxCount
             {
@@ -116,8 +143,8 @@ namespace osu.Desktop.VisualTests.Tests
                         {
                             var newStar = new Star
                             {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
+                                Anchor = direction == StarCounterDirection.LeftToRight ? Anchor.TopLeft : Anchor.TopRight,
+                                Origin = direction == StarCounterDirection.LeftToRight ? Anchor.TopLeft : Anchor.TopRight,
                                 AccentColour = AccentColour
                             };
 
@@ -199,7 +226,8 @@ namespace osu.Desktop.VisualTests.Tests
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Icon = FontAwesome.fa_star_o,
-                            TextSize = STAR_SIZE
+                            TextSize = STAR_SIZE,
+                            BlendingMode = BlendingMode.Additive
                         },
                         filledStarContainer = new Container
                         {
@@ -293,6 +321,12 @@ namespace osu.Desktop.VisualTests.Tests
 
                 public ProxyDrawable CreateOverlayProxy() => filledStarContainer.CreateProxy();
             }
+        }
+
+        internal enum StarCounterDirection
+        {
+            LeftToRight,
+            RightToLeft
         }
     }
 }
