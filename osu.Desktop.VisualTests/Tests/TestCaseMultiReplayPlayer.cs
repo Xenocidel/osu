@@ -18,6 +18,17 @@ using osu.Framework.Extensions.IEnumerableExtensions;
 using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Input;
+using osu.Game.Modes.UI;
+using osu.Game.Modes;
+using osu.Game.Modes.Objects;
+using osu.Game.Modes.Osu.Objects;
+using osu.Framework.MathUtils;
+using osu.Game.Beatmaps;
+using osu.Desktop.VisualTests.Beatmaps;
+using osu.Game.Database;
+using osu.Framework.Timing;
+using osu.Framework.Graphics.Primitives;
+using osu.Game.Modes.Scoring;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -27,18 +38,22 @@ namespace osu.Desktop.VisualTests.Tests
         {
             base.Reset();
 
-            Add(new MultiReplayPlayer());
+            Add(new MultiReplayPlayer()
+            {
+                Clock = new FramedClock()
+            });
         }
 
         internal class MultiReplayPlayer : OsuScreen
         {
             protected override BackgroundScreen CreateBackground() => new BackgroundScreenDefault();
 
-            private readonly StarCounter blueStarCounter;
-            private readonly StarCounter redStarCounter;
-            private readonly Sprite backgroundSprite;
+            private StarCounter blueStarCounter;
+            private StarCounter redStarCounter;
+            private Sprite backgroundSprite;
 
-            public MultiReplayPlayer()
+            [BackgroundDependencyLoader]
+            private void load(TextureStore textures, OsuColour colours)
             {
                 Children = new Drawable[]
                 {
@@ -49,27 +64,157 @@ namespace osu.Desktop.VisualTests.Tests
                     blueStarCounter = new StarCounter
                     {
                         Origin = Anchor.CentreLeft,
-                        Position = new Vector2(95, 75),
+                        Position = new Vector2(28, 40),
                         MaxCount = 3
                     },
                     redStarCounter = new StarCounter
                     {
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.CentreRight,
-                        Position = new Vector2(-95, 75),
+                        Position = new Vector2(-28, 40),
                         MaxCount = 3,
                         Direction = StarCounterDirection.RightToLeft
+                    },
+                    new PlayerContainer(4)
+                    {
+                        Position = new Vector2(0, 135)
                     }
                 };
-            }
 
-            [BackgroundDependencyLoader]
-            private void load(TextureStore textures, OsuColour colours)
-            {
                 backgroundSprite.Texture = textures.Get(@"Backgrounds/Tournament/background");
 
                 blueStarCounter.AccentColour = colours.Blue;
                 redStarCounter.AccentColour = colours.Red;
+            }
+        }
+
+        internal class PlayerContainer : FillFlowContainer
+        {
+            private FlowContainer<Player> bluePlayers;
+            private FlowContainer<Player> redPlayers;
+
+            public PlayerContainer(int playersPerTeam)
+            {
+                RelativeSizeAxes = Axes.X;
+
+                Children = new[]
+                {
+                    bluePlayers = new FillFlowContainer<Player>()
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y
+                    },
+                    redPlayers = new FillFlowContainer<Player>()
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y
+                    }
+                };
+
+                if (playersPerTeam > 2)
+                {
+                    // Tile teams horizontally
+                    bluePlayers.Width = 0.5f;
+                    redPlayers.Width = 0.5f;
+                }
+
+                for (int i = 0; i < playersPerTeam; i++)
+                {
+                    bluePlayers.Add(new Player(false));
+                    redPlayers.Add(new Player(true));
+                }
+            }
+        }
+
+        internal class Player : Container
+        {
+            private readonly HitRenderer hitRenderer;
+            private readonly HudOverlay hudOverlay;
+            private readonly ScoreProcessor scoreProcessor;
+
+            public Player(bool teamRed)
+            {
+                RelativeSizeAxes = Axes.X;
+                Height = 140;
+
+                Ruleset ruleset = Ruleset.GetRuleset(PlayMode.Taiko);
+
+                List<HitObject> objects = new List<HitObject>();
+
+                int time = 500;
+                for (int i = 0; i < 100; i++)
+                {
+                    objects.Add(new HitCircle
+                    {
+                        StartTime = time,
+                        Position = new Vector2(RNG.Next(0, 512), RNG.Next(0, 384)),
+                        Scale = RNG.NextSingle(0.5f, 1.0f),
+                    });
+
+                    time += RNG.Next(50, 500);
+                }
+
+                WorkingBeatmap beatmap = new TestWorkingBeatmap(new Beatmap
+                {
+                    HitObjects = objects,
+                    BeatmapInfo = new BeatmapInfo
+                    {
+                        Difficulty = new BeatmapDifficulty(),
+                        Metadata = new BeatmapMetadata
+                        {
+                            Artist = @"Unknown",
+                            Title = @"Sample Beatmap",
+                            Author = @"peppy",
+                        }
+                    }
+                });
+
+                Children = new Drawable[]
+                {
+                    hitRenderer = ruleset.CreateHitRendererWith(beatmap),
+                    hudOverlay = new HudOverlay(teamRed)
+                };
+
+                scoreProcessor = hitRenderer.CreateScoreProcessor();
+
+                hitRenderer.Origin = Anchor.BottomLeft;
+                hitRenderer.Anchor = Anchor.BottomLeft;
+                hitRenderer.RelativeSizeAxes = Axes.X;
+                hitRenderer.Height = 97;
+                hitRenderer.Margin = new MarginPadding { Bottom = 5 };
+                hitRenderer.AspectAdjust = false;
+
+                hudOverlay.BindProcessor(scoreProcessor);
+            }
+        }
+
+        internal class HudOverlay : StandardHudOverlay
+        {
+            private readonly bool teamRed;
+
+            public HudOverlay(bool teamRed)
+            {
+                this.teamRed = teamRed;
+            }
+
+            protected override HealthDisplay CreateHealthDisplay() => new StandardHealthDisplay
+            {
+                Origin = Anchor.BottomLeft,
+                Anchor = Anchor.BottomLeft,
+                RelativeSizeAxes = Axes.X,
+                Size = new Vector2(1, 5)
+            };
+
+            [BackgroundDependencyLoader]
+            private void load(OsuColour colours)
+            {
+                var hd = HealthDisplay as StandardHealthDisplay;
+
+                if (teamRed)
+                {
+                    hd.AccentColour = colours.PinkLighter;
+                    hd.GlowColour = colours.PinkDarker;
+                }
             }
         }
 
