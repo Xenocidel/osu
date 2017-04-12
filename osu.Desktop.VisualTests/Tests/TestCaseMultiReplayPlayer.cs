@@ -29,6 +29,7 @@ using osu.Game.Database;
 using osu.Framework.Timing;
 using osu.Framework.Graphics.Primitives;
 using osu.Game.Modes.Scoring;
+using osu.Game.Graphics.Sprites;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -75,13 +76,14 @@ namespace osu.Desktop.VisualTests.Tests
                         MaxCount = 3,
                         Direction = StarCounterDirection.RightToLeft
                     },
-                    new PlayerContainer(4)
+                    new PlayerContainer(4),
+
                 };
 
                 backgroundSprite.Texture = textures.Get(@"Backgrounds/Tournament/background");
 
                 blueStarCounter.AccentColour = colours.Blue;
-                redStarCounter.AccentColour = colours.Red;
+                redStarCounter.AccentColour = colours.Pink;
             }
         }
 
@@ -148,6 +150,7 @@ namespace osu.Desktop.VisualTests.Tests
         internal class Player : Container
         {
             private const float player_height = 110;
+            private const float playfield_height = 70;
 
             private readonly HitRenderer hitRenderer;
             private readonly HudOverlay hudOverlay;
@@ -201,7 +204,7 @@ namespace osu.Desktop.VisualTests.Tests
                 hitRenderer.Origin = Anchor.BottomLeft;
                 hitRenderer.Anchor = Anchor.BottomLeft;
                 hitRenderer.RelativeSizeAxes = Axes.X;
-                hitRenderer.Height = 97;
+                hitRenderer.Height = playfield_height;
                 hitRenderer.Margin = new MarginPadding { Bottom = 5 };
                 hitRenderer.AspectAdjust = false;
 
@@ -211,11 +214,63 @@ namespace osu.Desktop.VisualTests.Tests
 
         internal class HudOverlay : StandardHudOverlay
         {
+            private string playerName;
+            public string PlayerName
+            {
+                get { return playerName; }
+                set
+                {
+                    playerName = value;
+                    nameTextGlow.Text = value;
+                    nameText.Text = value;
+
+                    nameTextGlowContainer.ForceRedraw();
+                }
+            }
+
+            private readonly BufferedContainer nameTextGlowContainer;
+            private readonly OsuSpriteText nameTextGlow;
+            private readonly OsuSpriteText nameText;
+
             private readonly bool teamRed;
 
             public HudOverlay(bool teamRed)
             {
                 this.teamRed = teamRed;
+
+                Add(new Container
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Position = new Vector2(35, 0),
+                    Children = new Drawable[]
+                    {
+                        nameTextGlowContainer = new BufferedContainer
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            AutoSizeAxes = Axes.Both,
+                            BlurSigma = new Vector2(3f),
+                            CacheDrawnFrameBuffer = true,
+                            BypassAutoSizeAxes = Axes.Both,
+                            Scale = new Vector2(1.05f),
+                            Children = new[]
+                            {
+                                nameTextGlow = new OsuSpriteText
+                                {
+                                    TextSize = 14,
+                                    Font = "Exo2.0-RegularItalic",
+                                    Text = "Name here"
+                                }
+                            }
+                        },
+                        nameText = new OsuSpriteText
+                        {
+                            TextSize = 14,
+                            Font = "Exo2.0-RegularItalic",
+                            Text = "Name here"
+                        }
+                    }
+                });
             }
 
             protected override HealthDisplay CreateHealthDisplay() => new StandardHealthDisplay
@@ -235,6 +290,14 @@ namespace osu.Desktop.VisualTests.Tests
                 {
                     hd.AccentColour = colours.PinkLighter;
                     hd.GlowColour = colours.PinkDarker;
+
+                    nameText.Colour = colours.PinkLighter;
+                    nameTextGlow.Colour = colours.PinkDarker;
+                }
+                else
+                {
+                    nameText.Colour = colours.BlueLighter;
+                    nameTextGlow.Colour = colours.BlueDarker;
                 }
             }
         }
@@ -375,7 +438,7 @@ namespace osu.Desktop.VisualTests.Tests
             private class Star : Container, IHasAccentColour
             {
                 public const float STAR_SIZE = 40f;
-                private const float glow_sigma = 10f;
+                private const float glow_sigma = 12f;
 
                 private readonly Container filledStarContainer;
                 private readonly TextAwesome baseStar;
