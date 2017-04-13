@@ -5,6 +5,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Transforms;
 using osu.Framework.MathUtils;
 using System;
+using osu.Framework.Allocation;
 
 namespace osu.Game.Graphics.UserInterface
 {
@@ -41,7 +42,11 @@ namespace osu.Game.Graphics.UserInterface
 
         protected override string FormatCount(double count)
         {
-            return ((long)count).ToString("D" + LeadingZeroes);
+            string format = new string('0', (int)LeadingZeroes);
+            for (int i = format.Length - 3; i > 0; i -= 3)
+                format = format.Insert(i, @",");
+
+            return ((long)count).ToString(format);
         }
 
         public override void Increment(double amount)

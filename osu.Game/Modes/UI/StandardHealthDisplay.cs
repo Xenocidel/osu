@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2007-2017 ppy Pty Ltd <contact@ppy.sh>.
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
+using System;
 using OpenTK;
 using OpenTK.Graphics;
 using osu.Framework.Graphics;
@@ -14,15 +15,10 @@ namespace osu.Game.Modes.UI
     {
         private readonly Container fill;
 
-        private Color4 accentColour;
         public Color4 AccentColour
         {
-            get { return accentColour; }
-            set
-            {
-                accentColour = value;
-                fill.Colour = AccentColour;
-            }
+            get { return fill.Colour; }
+            set { fill.Colour = value; }
         }
 
         private Color4 glowColour;
@@ -31,10 +27,13 @@ namespace osu.Game.Modes.UI
             get { return glowColour; }
             set
             {
+                if (glowColour == value)
+                    return;
                 glowColour = value;
+
                 fill.EdgeEffect = new EdgeEffect
                 {
-                    Colour = GlowColour,
+                    Colour = glowColour,
                     Radius = 8,
                     Type = EdgeEffectType.Glow
                 };

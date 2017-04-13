@@ -1,54 +1,47 @@
 ﻿// Copyright (c) 2007-2017 ppy Pty Ltd <contact@ppy.sh>.
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
+using System;
+using OpenTK.Graphics;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Transforms;
 using osu.Framework.MathUtils;
-using System;
-using osu.Framework.Allocation;
 
 namespace osu.Game.Graphics.UserInterface
 {
     /// <summary>
     /// Used as an accuracy counter. Represented visually as a percentage.
     /// </summary>
-    public class PercentageCounter : RollingCounter<double>
+    public class SimpleComboCounter : RollingCounter<int>
     {
-        protected override Type TransformType => typeof(TransformAccuracy);
+        protected override Type TransformType => typeof(TransformCount);
 
         protected override double RollingDuration => 750;
 
-        private float epsilon => 1e-10f;
-
-        public void SetFraction(float numerator, float denominator)
+        public SimpleComboCounter()
         {
-            Current.Value = Math.Abs(denominator) < epsilon ? 1.0f : numerator / denominator;
+            Current.Value = DisplayedCount = 0;
         }
 
-        public PercentageCounter()
+        protected override string FormatCount(int count)
         {
-            DisplayedCountSpriteText.FixedWidth = true;
-            Current.Value = DisplayedCount = 1.0f;
+            return $@"{count}x";
         }
 
-        protected override string FormatCount(double count)
-        {
-            return $@"{count:P2}";
-        }
-
-        protected override double GetProportionalDuration(double currentValue, double newValue)
+        protected override double GetProportionalDuration(int currentValue, int newValue)
         {
             return Math.Abs(currentValue - newValue) * RollingDuration * 100.0f;
         }
 
-        public override void Increment(double amount)
+        public override void Increment(int amount)
         {
             Current.Value = Current + amount;
         }
 
-        protected class TransformAccuracy : Transform<double>
+        protected class TransformCount : Transform<int>
         {
-            public override double CurrentValue
+            public override int CurrentValue
             {
                 get
                 {
@@ -56,14 +49,14 @@ namespace osu.Game.Graphics.UserInterface
                     if (time < StartTime) return StartValue;
                     if (time >= EndTime) return EndValue;
 
-                    return Interpolation.ValueAt(time, (float)StartValue, (float)EndValue, StartTime, EndTime, Easing);
+                    return (int)Interpolation.ValueAt(time, StartValue, EndValue, StartTime, EndTime, Easing);
                 }
             }
 
             public override void Apply(Drawable d)
             {
                 base.Apply(d);
-                ((PercentageCounter)d).DisplayedCount = CurrentValue;
+                ((SimpleComboCounter)d).DisplayedCount = CurrentValue;
             }
         }
     }
