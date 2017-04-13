@@ -13,7 +13,7 @@ namespace osu.Game.Modes.Taiko.Objects.Drawables
         /// <summary>
         /// The vertical offset of the triangles from the line tracker.
         /// </summary>
-        private const float triangle_offfset = 10f;
+        private const float triangle_offfset = 5f;
 
         /// <summary>
         /// The size of the triangles.
