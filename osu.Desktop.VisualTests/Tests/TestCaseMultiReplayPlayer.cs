@@ -30,6 +30,8 @@ using osu.Framework.Timing;
 using osu.Framework.Graphics.Primitives;
 using osu.Game.Modes.Scoring;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
+using osu.Game.Beatmaps.Timing;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -183,7 +185,7 @@ namespace osu.Desktop.VisualTests.Tests
                     time += RNG.Next(50, 500);
                 }
 
-                WorkingBeatmap beatmap = new TestWorkingBeatmap(new Beatmap
+                Beatmap b = new Beatmap
                 {
                     HitObjects = objects,
                     BeatmapInfo = new BeatmapInfo
@@ -196,7 +198,16 @@ namespace osu.Desktop.VisualTests.Tests
                             Author = @"peppy",
                         }
                     }
+                };
+
+                b.TimingInfo.ControlPoints.Add(new ControlPoint
+                {
+                    Time = 0,
+                    TimeSignature = TimeSignatures.SimpleQuadruple,
+                    BeatLength = 1000
                 });
+
+                WorkingBeatmap beatmap = new TestWorkingBeatmap(b);
 
                 Children = new Drawable[]
                 {
