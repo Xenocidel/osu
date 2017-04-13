@@ -44,10 +44,23 @@ namespace osu.Desktop.VisualTests.Tests
         {
             base.Reset();
 
-            Add(new MultiReplayPlayer(createTestBeatmap())
+            MultiReplayPlayer player;
+            Add(player = new MultiReplayPlayer(createTestBeatmap())
             {
                 Clock = new FramedClock()
             });
+
+            const int max_players = 3;
+            for (int i = 0; i < max_players; i++)
+            {
+                var score = new Score
+                {
+                    User = new User { Username = $@"Test player" }
+                };
+
+                player.Teams.BlueTeam.AddPlayer(score);
+                player.Teams.RedTeam.AddPlayer(score);
+            }
         }
 
         private WorkingBeatmap createTestBeatmap()
@@ -102,7 +115,7 @@ namespace osu.Desktop.VisualTests.Tests
             private StarCounter redStarCounter;
             private Sprite backgroundSprite;
 
-            private TeamContainer teams;
+            public TeamContainer Teams;
 
             private int teamsCompleted;
 
@@ -116,7 +129,6 @@ namespace osu.Desktop.VisualTests.Tests
             [BackgroundDependencyLoader]
             private void load(TextureStore textures, OsuColour colours)
             {
-
                 Children = new Drawable[]
                 {
                     backgroundSprite = new Sprite
@@ -140,43 +152,41 @@ namespace osu.Desktop.VisualTests.Tests
                         Direction = StarCounterDirection.RightToLeft,
                         AccentColour = colours.PinkDarker
                     },
-                    teams = new TeamContainer(4),
+                    Teams = new TeamContainer(4, beatmap),
                 };
 
-                const int max_players = 3;
-                for (int i = 0; i < max_players; i++)
-                {
-                    var score = new Score
-                    {
-                        User = new User { Username = $@"Test player" }
-                    };
-
-                    teams.AddPlayer(false, score, beatmap);
-                    teams.AddPlayer(true, score, beatmap);
-                }
-
-                teams.Children.ForEach(t => t.OnTeamCompletion = onTeamComplete);
+                Teams.RedTeam.OnTeamCompletion = onTeamComplete;
+                Teams.BlueTeam.OnTeamCompletion = onTeamComplete;
             }
 
             private void onTeamComplete()
             {
                 teamsCompleted++;
 
-                if (teamsCompleted == teams.Children.Count())
+                if (teamsCompleted == Teams.Children.Count())
                 {
                     // Completion sequence
-                    teams.Children.ForEach(t => t.Players.Hide());
+                    onTeamWon(Teams.RedTeam.Score > Teams.BlueTeam.Score);    
                 }
+            }
+
+            private void onTeamWon(bool teamRed)
+            {
+                
             }
         }
 
         internal class TeamContainer : Container<Team>
         {
-            private Team blueColumn;
-            private Team redColumn;
+            public Team BlueTeam;
+            public Team RedTeam;
 
-            public TeamContainer(int playersPerTeam)
+            private readonly WorkingBeatmap beatmap;
+
+            public TeamContainer(int playersPerTeam, WorkingBeatmap beatmap)
             {
+                this.beatmap = beatmap;
+
                 RelativeSizeAxes = Axes.Both;
             }
 
@@ -187,11 +197,11 @@ namespace osu.Desktop.VisualTests.Tests
                 // and apply the offset of the play fields to the contents of the columns
                 Children = new[]
                 {
-                    blueColumn = new Team(false)
+                    BlueTeam = new Team(false, beatmap)
                     {
                         Name = "Blue team column",
                     },
-                    redColumn = new Team(true)
+                    RedTeam = new Team(true, beatmap)
                     {
                         Name = "Red team column",
                         RelativePositionAxes = Axes.X,
@@ -199,15 +209,7 @@ namespace osu.Desktop.VisualTests.Tests
                     }
                 };
 
-                blueColumn.BindTeamColumn(redColumn);
-            }
-
-            public void AddPlayer(bool teamRed, Score score, WorkingBeatmap beatmap)
-            {
-                if (teamRed)
-                    redColumn.AddPlayer(score, beatmap);
-                else
-                    blueColumn.AddPlayer(score, beatmap);
+                BlueTeam.BindTeamColumn(RedTeam);
             }
         }
 
@@ -222,17 +224,19 @@ namespace osu.Desktop.VisualTests.Tests
 
             public Color4 AccentColour
             {
-                get { return combinedScore.AccentColour; }
+                get { return teamScoreCounter.AccentColour; }
                 set
                 {
-                    combinedScore.AccentColour = value;
-                    scoreDiff.AccentColour = value;
+                    teamScoreCounter.AccentColour = value;
+                    scoreDiffCounter.AccentColour = value;
                 }
             }
 
+            public readonly BindableInt Score = new BindableInt();
+
             public readonly FlowContainer<Player> Players;
-            private readonly ScoreCounter combinedScore;
-            private readonly ScoreCounter scoreDiff;
+            private readonly ScoreCounter teamScoreCounter;
+            private readonly ScoreCounter scoreDiffCounter;
 
             private readonly Sprite flag;
 
@@ -243,10 +247,12 @@ namespace osu.Desktop.VisualTests.Tests
             private int playersCompleted;
             private int playersFailed;
 
+            private readonly WorkingBeatmap beatmap;
             private readonly bool teamRed;
 
-            public Team(bool teamRed)
+            public Team(bool teamRed, WorkingBeatmap beatmap)
             {
+                this.beatmap = beatmap;
                 this.teamRed = teamRed;
 
                 RelativeSizeAxes = Axes.Both;
@@ -271,14 +277,14 @@ namespace osu.Desktop.VisualTests.Tests
                         Direction = FillDirection.Vertical,
                         Children = new Drawable[]
                         {
-                            combinedScore = new ScoreCounter(6)
+                            teamScoreCounter = new ScoreCounter(6)
                             {
                                 Name = "Combined score",
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.TopCentre,
                                 TextSize = 36
                             },
-                            scoreDiff = new ScoreCounter
+                            scoreDiffCounter = new ScoreCounter
                             {
                                 Name = "Score diff",
                                 Anchor = Anchor.TopCentre,
@@ -289,6 +295,8 @@ namespace osu.Desktop.VisualTests.Tests
                         }
                     }
                 };
+
+                Score.ValueChanged += v => teamScoreCounter.Current.Value = v;
             }
 
             [BackgroundDependencyLoader]
@@ -296,17 +304,17 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 if (teamRed)
                 {
-                    combinedScore.AccentColour = colours.PinkLighter;
-                    scoreDiff.AccentColour = colours.PinkLighter;
+                    teamScoreCounter.AccentColour = colours.PinkLighter;
+                    scoreDiffCounter.AccentColour = colours.PinkLighter;
                 }
                 else
                 {
-                    combinedScore.AccentColour = colours.BlueLighter;
-                    scoreDiff.AccentColour = colours.BlueLighter;
+                    teamScoreCounter.AccentColour = colours.BlueLighter;
+                    scoreDiffCounter.AccentColour = colours.BlueLighter;
                 }
             }
 
-            public void AddPlayer(Score score, WorkingBeatmap beatmap)
+            public void AddPlayer(Score score)
             {
                 Players.Add(new Player(teamRed, score, beatmap)
                 {
@@ -354,11 +362,11 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 base.Update();
 
-                combinedScore.Current.Value = Players.Children.Sum(p => p.Score);
+                Score.Value = (int)Players.Children.Sum(p => p.Score);
 
                 if (otherColumn != null)
-                    scoreDiff.Current.Value = Math.Min(0, combinedScore.Current - otherColumn.combinedScore.Current);
-                scoreDiff.FadeTo(scoreDiff.Current == 0 ? 0 : 1, 200);
+                    scoreDiffCounter.Current.Value = Math.Min(0, Score.Value - otherColumn.Score.Value);
+                scoreDiffCounter.FadeTo(scoreDiffCounter.Current == 0 ? 0 : 1, 200);
             }
         }
 
@@ -371,7 +379,7 @@ namespace osu.Desktop.VisualTests.Tests
 
             private HitRenderer hitRenderer;
             private HudOverlay hudOverlay;
-            private  ScoreProcessor scoreProcessor;
+            private ScoreProcessor scoreProcessor;
 
             public Player(bool teamRed, Score score, WorkingBeatmap beatmap)
             {
