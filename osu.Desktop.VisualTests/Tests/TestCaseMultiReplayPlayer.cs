@@ -165,7 +165,7 @@ namespace osu.Desktop.VisualTests.Tests
                 if (teamsCompleted == teams.Children.Count())
                 {
                     // Completion sequence
-                    teams.FadeOut(200);
+                    teams.Children.ForEach(t => t.Players.Hide());
                 }
             }
         }
