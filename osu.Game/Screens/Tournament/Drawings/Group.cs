@@ -15,7 +15,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using osu.Game.Users;
 
-namespace osu.Game.Screens.Tournament
+namespace osu.Game.Screens.Tournament.Drawings
 {
     public class Group : Container
     {

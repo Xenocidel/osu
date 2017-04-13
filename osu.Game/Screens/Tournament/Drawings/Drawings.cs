@@ -17,13 +17,13 @@ using osu.Framework.Platform;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Screens.Backgrounds;
-using osu.Game.Screens.Tournament.Components;
-using osu.Game.Screens.Tournament.Teams;
 using OpenTK;
 using OpenTK.Graphics;
 using osu.Game.Users;
+using osu.Game.Screens.Tournament.Drawings.Components;
+using osu.Game.Screens.Tournament.Drawings.Teams;
 
-namespace osu.Game.Screens.Tournament
+namespace osu.Game.Screens.Tournament.Drawings
 {
     public class Drawings : OsuScreen
     {

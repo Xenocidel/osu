@@ -10,7 +10,7 @@ using osu.Framework.Graphics.Containers;
 using OpenTK;
 using osu.Game.Users;
 
-namespace osu.Game.Screens.Tournament
+namespace osu.Game.Screens.Tournament.Drawings
 {
     public class GroupContainer : Container
     {

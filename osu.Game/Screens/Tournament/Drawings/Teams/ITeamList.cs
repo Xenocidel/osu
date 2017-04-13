@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using osu.Game.Users;
 
-namespace osu.Game.Screens.Tournament.Teams
+namespace osu.Game.Screens.Tournament.Drawings.Teams
 {
     public interface ITeamList
     {

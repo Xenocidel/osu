@@ -15,6 +15,7 @@ using osu.Game.Screens.Select;
 using osu.Game.Screens.Tournament;
 using osu.Framework.Input;
 using OpenTK.Input;
+using osu.Game.Screens.Tournament.Drawings;
 
 namespace osu.Game.Screens.Menu
 {

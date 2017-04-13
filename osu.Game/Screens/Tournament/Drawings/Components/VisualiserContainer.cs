@@ -10,7 +10,7 @@ using osu.Framework.MathUtils;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace osu.Game.Screens.Tournament.Components
+namespace osu.Game.Screens.Tournament.Drawings.Components
 {
     internal class VisualiserContainer : Container
     {

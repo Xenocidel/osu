@@ -4,7 +4,7 @@
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
 
-namespace osu.Game.Screens.Tournament.Components
+namespace osu.Game.Screens.Tournament.Drawings.Components
 {
     public class DrawingsConfigManager : ConfigManager<DrawingsConfig>
     {

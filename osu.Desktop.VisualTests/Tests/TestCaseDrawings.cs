@@ -4,8 +4,9 @@
 using System.Collections.Generic;
 using osu.Framework.Testing;
 using osu.Game.Screens.Tournament;
-using osu.Game.Screens.Tournament.Teams;
 using osu.Game.Users;
+using osu.Game.Screens.Tournament.Drawings;
+using osu.Game.Screens.Tournament.Drawings.Teams;
 
 namespace osu.Desktop.VisualTests.Tests
 {
