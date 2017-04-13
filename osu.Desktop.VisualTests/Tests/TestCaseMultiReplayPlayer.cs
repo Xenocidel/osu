@@ -32,6 +32,7 @@ using osu.Game.Modes.Scoring;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Beatmaps.Timing;
+using osu.Framework.Configuration;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -90,76 +91,152 @@ namespace osu.Desktop.VisualTests.Tests
 
         internal class PlayerContainer : Container
         {
-            private const float player_container_start = 95;
-            private const float player_container_height = 480;
-            private const float player_spacing = 14;
-
-            private FlowContainer<Player> bluePlayers;
-            private FlowContainer<Player> redPlayers;
-
             public PlayerContainer(int playersPerTeam)
             {
                 RelativeSizeAxes = Axes.Both;
+
+                PlayerColumn blueColumn;
+                PlayerColumn redColumn;
 
                 // To achieve proper masking of the taiko playfield, we use two vertically-relative columns
                 // and apply the offset of the play fields to the contents of the columns
                 Children = new Drawable[]
                 {
-                    new Container
+                    blueColumn = new PlayerColumn(false, playersPerTeam)
                     {
                         Name = "Blue team column",
-                        RelativeSizeAxes = Axes.Both,
-                        Width = 0.5f,
-                        Padding = new MarginPadding { Top = player_container_start },
-                        Masking = true,
-                        Children = new[]
-                        {
-                            bluePlayers = new FillFlowContainer<Player>()
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                Height = player_container_height,
-                                Spacing = new Vector2(0, player_spacing)
-                            },
-                        }
                     },
-                    new Container
+                    redColumn = new PlayerColumn(true, playersPerTeam)
                     {
                         Name = "Red team column",
                         RelativePositionAxes = Axes.X,
-                        RelativeSizeAxes = Axes.Both,
-                        Width = 0.5f,
-                        X = 0.5f,
-                        Padding = new MarginPadding { Top = player_container_start },
-                        Masking = true,
-                        Children = new[]
+                        X = 0.5f
+                    }
+                };
+
+                blueColumn.BindPlayerColumn(redColumn);
+            }
+        }
+
+        internal class PlayerColumn : Container, IHasAccentColour
+        {
+            private const float player_container_start = 95;
+            private const float player_container_height = 480;
+            private const float player_spacing = 14;
+
+            public Color4 AccentColour
+            {
+                get { return combinedScore.AccentColour; }
+                set
+                {
+                    combinedScore.AccentColour = value;
+                    scoreDiff.AccentColour = value;
+                }
+            }
+
+            private FlowContainer<Player> players;
+            private ScoreCounter combinedScore;
+            private ScoreCounter scoreDiff;
+
+            private PlayerColumn otherColmn;
+
+            private bool teamRed;
+
+            public PlayerColumn(bool teamRed, int playerCount)
+            {
+                this.teamRed = teamRed;
+
+                RelativeSizeAxes = Axes.Both;
+                Width = 0.5f;
+                Padding = new MarginPadding { Top = player_container_start };
+                Masking = true;
+
+                Children = new Drawable[]
+                {
+                    players = new FillFlowContainer<Player>()
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        Height = player_container_height,
+                        Spacing = new Vector2(0, player_spacing)
+                    },
+                    new FillFlowContainer
+                    {
+                        Anchor = Anchor.BottomCentre,
+                        Origin = Anchor.Centre,
+                        Y = -150,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
                         {
-                            redPlayers = new FillFlowContainer<Player>()
+                            combinedScore = new ScoreCounter(6)
                             {
-                                RelativeSizeAxes = Axes.X,
-                                Height = player_container_height,
-                                Spacing = new Vector2(0, player_spacing)
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Y = -160,
+                                TextSize = 36
+                            },
+                            scoreDiff = new ScoreCounter
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Y = -160,
+                                TextSize = 14
                             }
                         }
                     }
                 };
 
-                for (int i = 0; i < playersPerTeam; i++)
+                for (int i = 0; i < playerCount; i++)
                 {
-                    bluePlayers.Add(new Player(false)
+                    players.Add(new Player(teamRed)
                     {
-                        Height = 1f / playersPerTeam - player_spacing / player_container_height
-                    });
-
-                    redPlayers.Add(new Player(true)
-                    {
-                        Height = 1f / playersPerTeam - player_spacing / player_container_height
+                        Height = 1f / playerCount - player_spacing / player_container_height
                     });
                 }
+            }
+
+            [BackgroundDependencyLoader]
+            private void load(OsuColour colours)
+            {
+                if (teamRed)
+                {
+                    combinedScore.AccentColour = colours.PinkLighter;
+                    scoreDiff.AccentColour = colours.PinkLighter;
+                }
+                else
+                {
+                    combinedScore.AccentColour = colours.BlueLighter;
+                    scoreDiff.AccentColour = colours.BlueLighter;
+                }
+            }
+
+            public void BindPlayerColumn(PlayerColumn other)
+            {
+                if (other == null)
+                    throw new ArgumentNullException(nameof(other));
+
+                if (otherColmn != null)
+                    return;
+
+                otherColmn = other;
+                other.BindPlayerColumn(this);
+            }
+
+            protected override void Update()
+            {
+                base.Update();
+
+                combinedScore.Current.Value = players.Children.Sum(p => p.Score);
+
+                if (otherColmn != null)
+                    scoreDiff.Current.Value = Math.Min(0, combinedScore.Current - otherColmn.combinedScore.Current);
+                scoreDiff.FadeTo(scoreDiff.Current == 0 ? 0 : 1, 200);
             }
         }
 
         internal class Player : Container
         {
+            public readonly Bindable<double> Score = new Bindable<double>();
+
             private readonly HitRenderer hitRenderer;
             private readonly HudOverlay hudOverlay;
             private readonly ScoreProcessor scoreProcessor;
@@ -215,6 +292,7 @@ namespace osu.Desktop.VisualTests.Tests
                     hudOverlay = new HudOverlay(teamRed)
                 };
 
+
                 scoreProcessor = hitRenderer.CreateScoreProcessor();
 
                 hitRenderer.Origin = Anchor.BottomLeft;
@@ -224,6 +302,7 @@ namespace osu.Desktop.VisualTests.Tests
                 hitRenderer.Margin = new MarginPadding { Bottom = 5 };
                 hitRenderer.AspectAdjust = false;
 
+                Score.BindTo(scoreProcessor.TotalScore);
                 hudOverlay.BindProcessor(scoreProcessor);
             }
         }
