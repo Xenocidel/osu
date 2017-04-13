@@ -96,18 +96,18 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 RelativeSizeAxes = Axes.Both;
 
-                PlayerColumn blueColumn;
-                PlayerColumn redColumn;
+                TeamColumn blueColumn;
+                TeamColumn redColumn;
 
                 // To achieve proper masking of the taiko playfield, we use two vertically-relative columns
                 // and apply the offset of the play fields to the contents of the columns
                 Children = new Drawable[]
                 {
-                    blueColumn = new PlayerColumn(false, playersPerTeam)
+                    blueColumn = new TeamColumn(false, playersPerTeam)
                     {
                         Name = "Blue team column",
                     },
-                    redColumn = new PlayerColumn(true, playersPerTeam)
+                    redColumn = new TeamColumn(true, playersPerTeam)
                     {
                         Name = "Red team column",
                         RelativePositionAxes = Axes.X,
@@ -119,7 +119,7 @@ namespace osu.Desktop.VisualTests.Tests
             }
         }
 
-        internal class PlayerColumn : Container, IHasAccentColour
+        internal class TeamColumn : Container, IHasAccentColour
         {
             private const float player_container_start = 95;
             private const float player_container_height = 480;
@@ -142,7 +142,7 @@ namespace osu.Desktop.VisualTests.Tests
             private ScoreCounter combinedScore;
             private ScoreCounter scoreDiff;
 
-            private PlayerColumn otherColmn;
+            private TeamColumn otherColmn;
 
             private AtomicCounter playersCompleted = new AtomicCounter();
             private AtomicCounter playersFailed = new AtomicCounter();
@@ -150,7 +150,7 @@ namespace osu.Desktop.VisualTests.Tests
             private bool teamRed;
             private int playerCount;
 
-            public PlayerColumn(bool teamRed, int playerCount)
+            public TeamColumn(bool teamRed, int playerCount)
             {
                 this.teamRed = teamRed;
                 this.playerCount = playerCount;
@@ -222,7 +222,7 @@ namespace osu.Desktop.VisualTests.Tests
                 }
             }
 
-            public void BindPlayerColumn(PlayerColumn other)
+            public void BindPlayerColumn(TeamColumn other)
             {
                 if (other == null)
                     throw new ArgumentNullException(nameof(other));
