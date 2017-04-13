@@ -57,7 +57,7 @@ namespace osu.Desktop.VisualTests.Tests
             List<HitObject> objects = new List<HitObject>();
 
             int time = 500;
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 20; i++)
             {
                 objects.Add(new HitCircle
                 {
@@ -102,8 +102,12 @@ namespace osu.Desktop.VisualTests.Tests
             private StarCounter redStarCounter;
             private Sprite backgroundSprite;
 
-            private readonly WorkingBeatmap beatmap;
+            private TeamContainer teams;
 
+            private int teamsCompleted;
+
+            private readonly WorkingBeatmap beatmap;
+            
             public MultiReplayPlayer(WorkingBeatmap beatmap)
             {
                 this.beatmap = beatmap;
@@ -112,7 +116,6 @@ namespace osu.Desktop.VisualTests.Tests
             [BackgroundDependencyLoader]
             private void load(TextureStore textures, OsuColour colours)
             {
-                TeamsContainer teams;
 
                 Children = new Drawable[]
                 {
@@ -137,7 +140,7 @@ namespace osu.Desktop.VisualTests.Tests
                         Direction = StarCounterDirection.RightToLeft,
                         AccentColour = colours.PinkDarker
                     },
-                    teams = new TeamsContainer(4),
+                    teams = new TeamContainer(4),
                 };
 
                 const int max_players = 3;
@@ -151,15 +154,28 @@ namespace osu.Desktop.VisualTests.Tests
                     teams.AddPlayer(false, score, beatmap);
                     teams.AddPlayer(true, score, beatmap);
                 }
+
+                teams.Children.ForEach(t => t.OnTeamCompletion = onTeamComplete);
+            }
+
+            private void onTeamComplete()
+            {
+                teamsCompleted++;
+
+                if (teamsCompleted == teams.Children.Count())
+                {
+                    // Completion sequence
+                    teams.FadeOut(200);
+                }
             }
         }
 
-        internal class TeamsContainer : Container
+        internal class TeamContainer : Container<Team>
         {
-            private TeamColumn blueColumn;
-            private TeamColumn redColumn;
+            private Team blueColumn;
+            private Team redColumn;
 
-            public TeamsContainer(int playersPerTeam)
+            public TeamContainer(int playersPerTeam)
             {
                 RelativeSizeAxes = Axes.Both;
             }
@@ -169,13 +185,13 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 // To achieve proper masking of the taiko playfield, we use two vertically-relative columns
                 // and apply the offset of the play fields to the contents of the columns
-                Children = new Drawable[]
+                Children = new[]
                 {
-                    blueColumn = new TeamColumn(false)
+                    blueColumn = new Team(false)
                     {
                         Name = "Blue team column",
                     },
-                    redColumn = new TeamColumn(true)
+                    redColumn = new Team(true)
                     {
                         Name = "Red team column",
                         RelativePositionAxes = Axes.X,
@@ -195,7 +211,7 @@ namespace osu.Desktop.VisualTests.Tests
             }
         }
 
-        private class TeamColumn : Container, IHasAccentColour
+        internal class Team : Container, IHasAccentColour
         {
             private const float player_container_start = 95;
             private const float player_container_height = 480;
@@ -214,24 +230,22 @@ namespace osu.Desktop.VisualTests.Tests
                 }
             }
 
-            private FlowContainer<Player> players;
-            private ScoreCounter combinedScore;
-            private ScoreCounter scoreDiff;
+            public readonly FlowContainer<Player> Players;
+            private readonly ScoreCounter combinedScore;
+            private readonly ScoreCounter scoreDiff;
 
             private readonly Sprite flag;
 
             private readonly OsuSpriteText name;
 
-            private TeamColumn otherColumn;
+            private Team otherColumn;
 
-            private AtomicCounter playersCompleted = new AtomicCounter();
-            private AtomicCounter playersFailed = new AtomicCounter();
-
-            private int playerCount;
+            private int playersCompleted;
+            private int playersFailed;
 
             private readonly bool teamRed;
 
-            public TeamColumn(bool teamRed)
+            public Team(bool teamRed)
             {
                 this.teamRed = teamRed;
 
@@ -242,7 +256,7 @@ namespace osu.Desktop.VisualTests.Tests
 
                 Children = new Drawable[]
                 {
-                    players = new FillFlowContainer<Player>()
+                    Players = new FillFlowContainer<Player>()
                     {
                         RelativeSizeAxes = Axes.X,
                         Height = player_container_height,
@@ -294,17 +308,16 @@ namespace osu.Desktop.VisualTests.Tests
 
             public void AddPlayer(Score score, WorkingBeatmap beatmap)
             {
-                players.Add(new Player(teamRed, score, beatmap)
+                Players.Add(new Player(teamRed, score, beatmap)
                 {
                     OnCompletion = playerCompleted,
                     OnFail = playerFailed,
                 });
-
-                int playerCount = players.Children.Count();
-                players.Children.ForEach(p => p.Height = 1f / playerCount - player_spacing / player_container_height);
+                
+                Players.Children.ForEach(p => p.Height = 1f / Players.Children.Count() - player_spacing / player_container_height);
             }
 
-            public void BindTeamColumn(TeamColumn other)
+            public void BindTeamColumn(Team other)
             {
                 if (other == null)
                     throw new ArgumentNullException(nameof(other));
@@ -318,18 +331,22 @@ namespace osu.Desktop.VisualTests.Tests
 
             private void playerCompleted()
             {
+                playersCompleted++;
+
                 // Don't perform OnTeamCompletion if the team has failed
                 // This is needed because taiko performs OnFail at the end of the map
-                if (playersFailed.Value == playerCount)
+                if (playersFailed == Players.Children.Count())
                     return;
 
-                if (playersCompleted.Increment() == playerCount)
+                if (playersCompleted == Players.Children.Count())
                     OnTeamCompletion?.Invoke();
             }
 
             private void playerFailed()
             {
-                if (playersFailed.Increment() == playerCount)
+                playersFailed++;
+
+                if (playersFailed == Players.Children.Count())
                     OnTeamFail?.Invoke();
             }
 
@@ -337,54 +354,54 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 base.Update();
 
-                combinedScore.Current.Value = players.Children.Sum(p => p.Score);
+                combinedScore.Current.Value = Players.Children.Sum(p => p.Score);
 
                 if (otherColumn != null)
                     scoreDiff.Current.Value = Math.Min(0, combinedScore.Current - otherColumn.combinedScore.Current);
                 scoreDiff.FadeTo(scoreDiff.Current == 0 ? 0 : 1, 200);
             }
+        }
 
-            private class Player : Container
+        internal class Player : Container
+        {
+            public Action OnCompletion;
+            public Action OnFail;
+
+            public readonly Bindable<double> Score = new Bindable<double>();
+
+            private HitRenderer hitRenderer;
+            private HudOverlay hudOverlay;
+            private  ScoreProcessor scoreProcessor;
+
+            public Player(bool teamRed, Score score, WorkingBeatmap beatmap)
             {
-                public Action OnCompletion;
-                public Action OnFail;
+                RelativeSizeAxes = Axes.Both;
 
-                public readonly Bindable<double> Score = new Bindable<double>();
+                Ruleset ruleset = Ruleset.GetRuleset(PlayMode.Taiko);
 
-                private HitRenderer hitRenderer;
-                private HudOverlay hudOverlay;
-                private  ScoreProcessor scoreProcessor;
-
-                public Player(bool teamRed, Score score, WorkingBeatmap beatmap)
+                Children = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.Both;
-
-                    Ruleset ruleset = Ruleset.GetRuleset(PlayMode.Taiko);
-
-                    Children = new Drawable[]
+                    hitRenderer = ruleset.CreateHitRendererWith(beatmap),
+                    hudOverlay = new HudOverlay(teamRed)
                     {
-                        hitRenderer = ruleset.CreateHitRendererWith(beatmap),
-                        hudOverlay = new HudOverlay(teamRed)
-                        {
-                            PlayerName = score.User.Username
-                        }
-                    };
+                        PlayerName = score.User.Username
+                    }
+                };
 
-                    scoreProcessor = hitRenderer.CreateScoreProcessor();
+                scoreProcessor = hitRenderer.CreateScoreProcessor();
 
-                    hitRenderer.Origin = Anchor.BottomLeft;
-                    hitRenderer.Anchor = Anchor.BottomLeft;
-                    hitRenderer.RelativeSizeAxes = Axes.Both;
-                    hitRenderer.Height = 0.65f;
-                    hitRenderer.Margin = new MarginPadding { Bottom = 5 };
-                    hitRenderer.AspectAdjust = false;
+                hitRenderer.Origin = Anchor.BottomLeft;
+                hitRenderer.Anchor = Anchor.BottomLeft;
+                hitRenderer.RelativeSizeAxes = Axes.Both;
+                hitRenderer.Height = 0.65f;
+                hitRenderer.Margin = new MarginPadding { Bottom = 5 };
+                hitRenderer.AspectAdjust = false;
 
-                    hitRenderer.OnAllJudged += () => OnCompletion?.Invoke();
-                    scoreProcessor.Failed += () => OnFail?.Invoke();
+                hitRenderer.OnAllJudged += () => OnCompletion?.Invoke();
+                scoreProcessor.Failed += () => OnFail?.Invoke();
 
-                    Score.BindTo(scoreProcessor.TotalScore);
-                    hudOverlay.BindProcessor(scoreProcessor);
-                }
+                Score.BindTo(scoreProcessor.TotalScore);
+                hudOverlay.BindProcessor(scoreProcessor);
             }
         }
 
