@@ -33,6 +33,8 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Beatmaps.Timing;
 using osu.Framework.Configuration;
+using System.Threading;
+using osu.Framework.Threading;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -124,6 +126,9 @@ namespace osu.Desktop.VisualTests.Tests
             private const float player_container_height = 480;
             private const float player_spacing = 14;
 
+            public Action OnTeamFail;
+            public Action OnTeamCompletion;
+
             public Color4 AccentColour
             {
                 get { return combinedScore.AccentColour; }
@@ -140,11 +145,16 @@ namespace osu.Desktop.VisualTests.Tests
 
             private PlayerColumn otherColmn;
 
+            private AtomicCounter playersCompleted = new AtomicCounter();
+            private AtomicCounter playersFailed = new AtomicCounter();
+
             private bool teamRed;
+            private int playerCount;
 
             public PlayerColumn(bool teamRed, int playerCount)
             {
                 this.teamRed = teamRed;
+                this.playerCount = playerCount;
 
                 RelativeSizeAxes = Axes.Both;
                 Width = 0.5f;
@@ -187,10 +197,15 @@ namespace osu.Desktop.VisualTests.Tests
 
                 for (int i = 0; i < playerCount; i++)
                 {
-                    players.Add(new Player(teamRed)
+                    var p = new Player(teamRed)
                     {
                         Height = 1f / playerCount - player_spacing / player_container_height
-                    });
+                    };
+
+                    p.OnCompletion += playerCompleted;
+                    p.OnFail += playerFailed;
+
+                    players.Add(p);
                 }
             }
 
@@ -221,6 +236,23 @@ namespace osu.Desktop.VisualTests.Tests
                 other.BindPlayerColumn(this);
             }
 
+            private void playerCompleted()
+            {
+                // Don't perform OnTeamCompletion if the team has failed
+                // This is needed because taiko performs OnFail at the end of the map
+                if (playersFailed.Value == playerCount)
+                    return;
+
+                if (playersCompleted.Increment() == playerCount)
+                    OnTeamCompletion?.Invoke();
+            }
+
+            private void playerFailed()
+            {
+                if (playersFailed.Increment() == playerCount)
+                    OnTeamFail?.Invoke();
+            }
+
             protected override void Update()
             {
                 base.Update();
@@ -235,6 +267,9 @@ namespace osu.Desktop.VisualTests.Tests
 
         internal class Player : Container
         {
+            public Action OnCompletion;
+            public Action OnFail;
+
             public readonly Bindable<double> Score = new Bindable<double>();
 
             private readonly HitRenderer hitRenderer;
@@ -292,7 +327,6 @@ namespace osu.Desktop.VisualTests.Tests
                     hudOverlay = new HudOverlay(teamRed)
                 };
 
-
                 scoreProcessor = hitRenderer.CreateScoreProcessor();
 
                 hitRenderer.Origin = Anchor.BottomLeft;
@@ -301,6 +335,9 @@ namespace osu.Desktop.VisualTests.Tests
                 hitRenderer.Height = 0.65f;
                 hitRenderer.Margin = new MarginPadding { Bottom = 5 };
                 hitRenderer.AspectAdjust = false;
+
+                hitRenderer.OnAllJudged += () => OnCompletion?.Invoke();
+                scoreProcessor.Failed += () => OnFail?.Invoke();
 
                 Score.BindTo(scoreProcessor.TotalScore);
                 hudOverlay.BindProcessor(scoreProcessor);
