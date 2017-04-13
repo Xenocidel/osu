@@ -33,7 +33,6 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Beatmaps.Timing;
 using osu.Framework.Configuration;
-using System.Threading;
 using osu.Framework.Threading;
 
 namespace osu.Desktop.VisualTests.Tests
@@ -179,17 +178,16 @@ namespace osu.Desktop.VisualTests.Tests
                         {
                             combinedScore = new ScoreCounter(6)
                             {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Y = -160,
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
                                 TextSize = 36
                             },
                             scoreDiff = new ScoreCounter
                             {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Y = -160,
-                                TextSize = 14
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                TextSize = 14,
+                                Alpha = 0
                             }
                         }
                     }
