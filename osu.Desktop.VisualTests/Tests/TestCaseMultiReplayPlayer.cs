@@ -262,15 +262,42 @@ namespace osu.Desktop.VisualTests.Tests
                 Size = new Vector2(1, 5)
             };
 
+            protected override ScoreCounter CreateScoreCounter() => new ScoreCounter(6)
+            {
+                Anchor = Anchor.TopRight,
+                Origin = Anchor.TopRight,
+                TextSize = 21,
+                Position = new Vector2(-30, 0)
+            };
+
+            protected override RollingCounter<int> CreateComboCounter() => new SimpleComboCounter
+            {
+                Anchor = Anchor.TopRight,
+                Origin = Anchor.TopRight,
+                TextSize = 14,
+                Position = new Vector2(-200, 0)
+            };
+
+            protected override RollingCounter<double> CreateAccuracyCounter() => new PercentageCounter
+            {
+                Anchor = Anchor.TopRight,
+                Origin = Anchor.TopRight,
+                TextSize = 10,
+                Position = new Vector2(-260, 0)
+            };
+
             [BackgroundDependencyLoader]
             private void load(OsuColour colours)
             {
-                var hd = HealthDisplay as StandardHealthDisplay;
+                var shd = HealthDisplay as StandardHealthDisplay;
 
                 if (teamRed)
                 {
-                    hd.AccentColour = colours.PinkLighter;
-                    hd.GlowColour = colours.PinkDarker;
+                    ComboCounter.AccentColour = colours.PinkLighter;
+                    ScoreCounter.AccentColour = colours.PinkLighter;
+                    AccuracyCounter.AccentColour = colours.PinkLighter;
+                    shd.AccentColour = colours.PinkLighter;
+                    shd.GlowColour = colours.PinkDarker;
 
                     nameText.Colour = colours.PinkLighter;
                 }
