@@ -67,14 +67,14 @@ namespace osu.Desktop.VisualTests.Tests
                     blueStarCounter = new StarCounter
                     {
                         Origin = Anchor.CentreLeft,
-                        Position = new Vector2(28, 40),
+                        Position = new Vector2(30, 30),
                         MaxCount = 3
                     },
                     redStarCounter = new StarCounter
                     {
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.CentreRight,
-                        Position = new Vector2(-28, 40),
+                        Position = new Vector2(-30, 30),
                         MaxCount = 3,
                         Direction = StarCounterDirection.RightToLeft
                     },
@@ -83,8 +83,8 @@ namespace osu.Desktop.VisualTests.Tests
 
                 backgroundSprite.Texture = textures.Get(@"Backgrounds/Tournament/background");
 
-                blueStarCounter.AccentColour = colours.Blue;
-                redStarCounter.AccentColour = colours.Pink;
+                blueStarCounter.AccentColour = colours.BlueDarker;
+                redStarCounter.AccentColour = colours.PinkDarker;
             }
         }
 
@@ -452,7 +452,7 @@ namespace osu.Desktop.VisualTests.Tests
 
             private class Star : Container, IHasAccentColour
             {
-                public const float STAR_SIZE = 40f;
+                public const float STAR_SIZE = 28f;
                 private const float glow_sigma = 12f;
 
                 private readonly Container filledStarContainer;
