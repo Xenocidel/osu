@@ -56,8 +56,6 @@
     <Compile Include="Multiplayer\MultiHudOverlay.cs" />
     <Compile Include="Multiplayer\MultiPlayer.cs" />
     <Compile Include="Multiplayer\MultiReplayPlayer.cs" />
-    <Compile Include="Multiplayer\MultiTeam.cs" />
-    <Compile Include="Multiplayer\MultiTeamContainer.cs" />
     <Compile Include="Objects\BarLine.cs" />
     <Compile Include="Objects\Drawables\DrawableBarLine.cs" />
     <Compile Include="Objects\Drawables\DrawableBarLineMajor.cs" />

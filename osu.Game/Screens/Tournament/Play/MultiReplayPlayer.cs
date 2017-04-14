@@ -11,6 +11,12 @@ using osu.Game.Graphics;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Tournament.Play.Components;
 using System.Linq;
+using osu.Game.Online.API;
+using osu.Framework.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Tournament.Play.Objects;
+using osu.Game.Database;
+using osu.Framework.Extensions.IEnumerableExtensions;
 
 namespace osu.Game.Screens.Tournament.Play
 {
@@ -33,6 +39,10 @@ namespace osu.Game.Screens.Tournament.Play
             }
         }
 
+        public int RoomId;
+
+        private BeatmapDatabase beatmaps;
+        private APIAccess api;
         private StarCounter blueStarCounter;
         private StarCounter redStarCounter;
         private Sprite backgroundSprite;
@@ -40,20 +50,20 @@ namespace osu.Game.Screens.Tournament.Play
         private OsuSpriteText headerDescription;
         private OsuSpriteText headerBeatmap;
 
-        public MultiTeamContainer Teams;
+        public Container<MultiTeam> Teams;
 
+        private MultiTeam blueTeam;
+        private MultiTeam redTeam;
+
+        private WorkingBeatmap currentWorkingBeatmap;
         private int teamsCompleted;
 
-        private readonly WorkingBeatmap beatmap;
-
-        public MultiReplayPlayer(WorkingBeatmap beatmap)
-        {
-            this.beatmap = beatmap;
-        }
-
         [BackgroundDependencyLoader]
-        private void load(TextureStore textures, OsuColour colours)
+        private void load(TextureStore textures, OsuColour colours, APIAccess api, BeatmapDatabase beatmaps)
         {
+            this.api = api;
+            this.beatmaps = beatmaps;
+
             Children = new Drawable[]
             {
                 backgroundSprite = new Sprite
@@ -104,11 +114,106 @@ namespace osu.Game.Screens.Tournament.Play
                     Direction = StarCounterDirection.RightToLeft,
                     AccentColour = colours.PinkDarker
                 },
-                Teams = CreateTeamContainer(beatmap)
+                Teams = new Container<MultiTeam>
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new[]
+                    {
+                        blueTeam = new MultiTeam(false),
+                        redTeam = new MultiTeam(true)
+                        {
+                            RelativePositionAxes = Axes.X,
+                            X = 0.5f
+                        }
+                    }
+                },
             };
 
-            Teams.RedTeam.OnTeamCompletion = onTeamComplete;
-            Teams.BlueTeam.OnTeamCompletion = onTeamComplete;
+            blueTeam.BindTeam(redTeam);
+            redTeam.OnTeamCompletion = onTeamComplete;
+            blueTeam.OnTeamCompletion = onTeamComplete;
+
+            // Begin polling
+            poll();
+            Scheduler.AddDelayed(poll, 1000, true);
+        }
+
+        public void poll()
+        {
+            // Todo: Re-enable
+            var req = new GetGameRequest(RoomId);
+            req.Success += updateRoom;
+            api.Queue(req);
+
+            // Todo: Disable
+            //updateRoom(new GetRoomResponse
+            //{
+            //    Slots = new[]
+            //    {
+            //        new Slot
+            //        {
+            //            UserId = 1040328,
+            //            Team = "Blue"
+            //        }
+            //    },
+            //    Name = "Some room",
+            //    PlayMode = "Taiko",
+            //    InProgress = true,
+            //});
+        }
+
+        private void updateRoom(GetRoomResponse response)
+        {
+            if (currentWorkingBeatmap == null || currentWorkingBeatmap.BeatmapInfo.Hash != response.BeatmapChecksum)
+            {
+                BeatmapInfo beatmap = beatmaps.Query<BeatmapInfo>().FirstOrDefault(b => b.Hash == response.BeatmapChecksum);
+                currentWorkingBeatmap = beatmap == null ? null : beatmaps.GetWorkingBeatmap(beatmap);
+            }
+
+            if (currentWorkingBeatmap == null)
+            {
+                headerBeatmap.FadeOut(100);
+                return;
+            }
+
+            // Set the header text
+            BeatmapMetadata metadata = currentWorkingBeatmap.BeatmapInfo.Metadata;
+            headerBeatmap.Text = $@"{metadata.Artist} - {metadata.Title} [{currentWorkingBeatmap.BeatmapInfo.Version}]";
+            headerBeatmap.FadeIn(100);
+
+            // Remove the old players that aren't in the room anymore
+            Teams.Children.ForEach(t => t.Players.Children.ForEach(p =>
+            {
+                string team = t == redTeam ? @"Red" : @"Blue";
+
+                if (!response.Slots.Any(slot => slot.UserId == p.UserId && slot.Team == team))
+                {
+                    p.FadeOut(500);
+                    p.Expire();
+                }
+            }));
+
+            // Add new players
+            response.Slots.ForEach(Slot =>
+            {
+                // Skip "empty" slots
+                if (Slot.UserId == -1)
+                    return;
+
+                // Skip slots where the player already exists
+                if (Teams.Children.Any(t => t.Players.Children.Any(p => p.UserId == Slot.UserId)))
+                    return;
+
+                switch (Slot.Team)
+                {
+                    case @"Blue":
+                        blueTeam.AddPlayer(CreatePlayer(false, Slot.UserId, currentWorkingBeatmap));
+                        break;
+                    case @"Red":
+                        redTeam.AddPlayer(CreatePlayer(true, Slot.UserId, currentWorkingBeatmap));
+                        break;
+                }
+            });
         }
 
         private void onTeamComplete()
@@ -118,12 +223,12 @@ namespace osu.Game.Screens.Tournament.Play
             if (teamsCompleted == Teams.Children.Count())
             {
                 // Completion sequence
-                OnCompleted(Teams.RedTeam.Score > Teams.BlueTeam.Score);
+                OnCompleted(redTeam.Score > blueTeam.Score);
             }
         }
 
         protected virtual void OnCompleted(bool winningTeamWasRed) { }
 
-        protected abstract MultiTeamContainer CreateTeamContainer(WorkingBeatmap beatmap);
+        protected abstract MultiPlayer CreatePlayer(bool teamRed, int userId, WorkingBeatmap beatmap);
     }
 }

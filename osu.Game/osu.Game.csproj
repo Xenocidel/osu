@@ -273,10 +273,13 @@
     <Compile Include="Screens\Tournament\Drawings\Teams\StorageBackedTeamList.cs" />
     <Compile Include="Screens\Tournament\Play\Components\StarCounter.cs" />
     <Compile Include="Screens\Tournament\Play\Components\StarCounterDirection.cs" />
+    <Compile Include="Screens\Tournament\Play\MultiHudOverlay.cs" />
     <Compile Include="Screens\Tournament\Play\MultiPlayer.cs" />
     <Compile Include="Screens\Tournament\Play\MultiReplayPlayer.cs" />
     <Compile Include="Screens\Tournament\Play\MultiTeam.cs" />
-    <Compile Include="Screens\Tournament\Play\MultiTeamContainer.cs" />
+    <Compile Include="Screens\Tournament\Play\Objects\GetRoomRequest.cs" />
+    <Compile Include="Screens\Tournament\Play\Objects\GetRoomResponse.cs" />
+    <Compile Include="Screens\Tournament\Play\Objects\Slot.cs" />
     <Compile Include="Users\UpdateableAvatar.cs" />
     <Compile Include="Users\User.cs" />
     <Compile Include="Graphics\UserInterface\Volume\VolumeControl.cs" />

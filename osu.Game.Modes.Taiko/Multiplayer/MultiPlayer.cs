@@ -2,7 +2,6 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using osu.Game.Beatmaps;
-using osu.Game.Modes.Scoring;
 using osu.Game.Modes.UI;
 using osu.Game.Modes.Taiko.UI;
 using osu.Framework.Graphics.Primitives;
@@ -12,8 +11,8 @@ namespace osu.Game.Modes.Taiko.Multiplayer
 {
     public class MultiPlayer : Screens.Tournament.Play.MultiPlayer
     {
-        public MultiPlayer(bool teamRed, Score score, WorkingBeatmap beatmap)
-            : base(teamRed, score, beatmap)
+        public MultiPlayer(bool teamRed, int userId, WorkingBeatmap beatmap)
+            : base(teamRed, userId, beatmap)
         {
         }
 
@@ -26,9 +25,6 @@ namespace osu.Game.Modes.Taiko.Multiplayer
             AspectAdjust = false,
         };
 
-        protected override HudOverlay CreateHudOverlay(bool teamRed, Score score) => new MultiHudOverlay(teamRed)
-        {
-            PlayerName = score.User.Username
-        };
+        protected override Screens.Tournament.Play.MultiHudOverlay CreateHudOverlay(bool teamRed) => new MultiHudOverlay(teamRed);
     }
 }

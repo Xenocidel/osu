@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace osu.Game.Screens.Tournament.Play
 {
-    public abstract class MultiTeam : Container, IHasAccentColour
+    public class MultiTeam : Container, IHasAccentColour
     {
         private const float player_container_start = 95;
         private const float player_container_height = 480;
@@ -57,12 +57,10 @@ namespace osu.Game.Screens.Tournament.Play
         private int playersCompleted;
         private int playersFailed;
 
-        private readonly WorkingBeatmap beatmap;
         private readonly bool teamRed;
 
-        public MultiTeam(bool teamRed, WorkingBeatmap beatmap)
+        public MultiTeam(bool teamRed)
         {
-            this.beatmap = beatmap;
             this.teamRed = teamRed;
 
             RelativeSizeAxes = Axes.Both;
@@ -124,9 +122,8 @@ namespace osu.Game.Screens.Tournament.Play
             }
         }
 
-        public void AddPlayer(Score score)
+        public void AddPlayer(MultiPlayer player)
         {
-            MultiPlayer player = CreatePlayer(teamRed, score, beatmap);
             player.OnCompletion = playerCompleted;
             player.OnFail = playerFailed;
 
@@ -134,13 +131,13 @@ namespace osu.Game.Screens.Tournament.Play
             Players.Children.ForEach(p => p.Height = 1f / Players.Children.Count() - player_spacing / player_container_height);
         }
 
-        public void BindTeamColumn(MultiTeam other)
+        public void BindTeam(MultiTeam other)
         {
             if (otherColumn != null)
                 return;
 
             otherColumn = other ?? throw new ArgumentNullException(nameof(other));
-            other.BindTeamColumn(this);
+            other.BindTeam(this);
         }
 
         private void playerCompleted()
@@ -174,7 +171,5 @@ namespace osu.Game.Screens.Tournament.Play
                 scoreDiffCounter.Current.Value = Math.Min(0, Score.Value - otherColumn.Score.Value);
             scoreDiffCounter.FadeTo(scoreDiffCounter.Current == 0 ? 0 : 1, 200);
         }
-
-        public abstract MultiPlayer CreatePlayer(bool teamRed, Score score, WorkingBeatmap beatmap);
     }
 }
