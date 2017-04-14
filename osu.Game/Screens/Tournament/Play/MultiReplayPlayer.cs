@@ -18,9 +18,27 @@ namespace osu.Game.Screens.Tournament.Play
     {
         protected override BackgroundScreen CreateBackground() => new BackgroundScreenDefault();
 
+        private string header;
+        public string Header
+        {
+            get { return header; }
+            set
+            {
+                header = value;
+
+                if (!IsLoaded)
+                    return;
+
+                headerDescription.Text = header;
+            }
+        }
+
         private StarCounter blueStarCounter;
         private StarCounter redStarCounter;
         private Sprite backgroundSprite;
+
+        private OsuSpriteText headerDescription;
+        private OsuSpriteText headerBeatmap;
 
         public MultiTeamContainer Teams;
 
@@ -43,10 +61,37 @@ namespace osu.Game.Screens.Tournament.Play
                     FillMode = FillMode.Fill,
                     Texture = textures.Get(@"Backgrounds/Tournament/background")
                 },
+                new FillFlowContainer
+                {
+                    Name = "Header info",
+                    Anchor = Anchor.TopCentre,
+                    Origin = Anchor.Centre,
+                    AutoSizeAxes = Axes.Both,
+                    Y = 50,
+                    Direction = FillDirection.Vertical,
+                    Children = new[]
+                    {
+                        headerDescription = new OsuSpriteText
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Text = Header,
+                            TextSize = 24,
+                            Font = "Exo2.0-LightItalic"
+                        },
+                        headerBeatmap = new OsuSpriteText
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            TextSize = 14,
+                            Font = "Exo2.0-RegularItalic"
+                        }
+                    }
+                },
                 blueStarCounter = new StarCounter
                 {
                     Origin = Anchor.CentreLeft,
-                    Position = new Vector2(30, 30),
+                    Position = new Vector2(30, 50),
                     MaxCount = 3,
                     AccentColour = colours.BlueDarker
                 },
@@ -54,7 +99,7 @@ namespace osu.Game.Screens.Tournament.Play
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.CentreRight,
-                    Position = new Vector2(-30, 30),
+                    Position = new Vector2(-30, 50),
                     MaxCount = 3,
                     Direction = StarCounterDirection.RightToLeft,
                     AccentColour = colours.PinkDarker
