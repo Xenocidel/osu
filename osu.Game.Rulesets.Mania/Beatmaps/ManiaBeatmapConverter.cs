@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
+using OpenTK;
 using System.Linq;
 
 namespace osu.Game.Rulesets.Mania.Beatmaps
