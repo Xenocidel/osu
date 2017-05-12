@@ -92,6 +92,10 @@ namespace osu.Game.Rulesets.Mania.UI
 
         protected override DrawableHitObject<ManiaHitObject, ManiaJudgement> GetVisualRepresentation(ManiaHitObject h)
         {
+            var holdNote = h as HoldNote;
+            if (holdNote != null)
+                return new DrawableHoldNote(holdNote);
+
             var note = h as Note;
             if (note != null)
                 return new DrawableNote(note);
