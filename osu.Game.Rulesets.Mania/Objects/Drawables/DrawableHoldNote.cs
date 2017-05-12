@@ -38,13 +38,9 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
                 tailPiece = new NotePiece
                 {
                     Anchor = Anchor.TopCentre,
-                    Origin = Anchor.TopCentre
+                    Origin = Anchor.BottomCentre
                 }
             });
-
-            // The "length" of the hold note stops at the "base" of the tail piece
-            // but we want to contain the tail piece within our bounds
-            Height += (float)HitObject.Duration / headPiece.Height;
         }
 
         public override Color4 AccentColour
@@ -64,6 +60,17 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
 
         protected override void UpdateState(ArmedState state)
         {
+        }
+
+        protected override void Update()
+        {
+            if (Time.Current > HitObject.StartTime)
+                headPiece.Colour = Color4.Green;
+            if (Time.Current > HitObject.EndTime)
+            {
+                bodyPiece.Colour = Color4.Green;
+                tailPiece.Colour = Color4.Green;
+            }
         }
     }
 }
