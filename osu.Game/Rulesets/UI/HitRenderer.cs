@@ -120,6 +120,8 @@ namespace osu.Game.Rulesets.UI
         /// </summary>
         public Beatmap<TObject> Beatmap;
 
+        private readonly WorkingBeatmap workingBeatmap;
+
         /// <summary>
         /// Creates a hit renderer for a beatmap.
         /// </summary>
@@ -128,6 +130,8 @@ namespace osu.Game.Rulesets.UI
         internal HitRenderer(WorkingBeatmap beatmap, bool isForCurrentRuleset)
         {
             Debug.Assert(beatmap != null, "HitRenderer initialized with a null beatmap.");
+
+            this.workingBeatmap = beatmap;
 
             RelativeSizeAxes = Axes.Both;
 
@@ -147,9 +151,13 @@ namespace osu.Game.Rulesets.UI
 
             // Post-process the beatmap
             processor.PostProcess(Beatmap);
+        }
 
+        [BackgroundDependencyLoader]
+        private void load()
+        {
             // Add mods, should always be the last thing applied to give full control to mods
-            applyMods(beatmap.Mods.Value);
+            applyMods(workingBeatmap.Mods.Value);
         }
 
         /// <summary>

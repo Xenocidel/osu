@@ -16,10 +16,12 @@ using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Judgements;
 using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Mania.Objects.Drawables;
+using osu.Game.Rulesets.Mania.Replays;
 using osu.Game.Rulesets.Mania.Scoring;
 using osu.Game.Rulesets.Mania.Timing;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Replays;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Rulesets.UI;
 
@@ -29,12 +31,10 @@ namespace osu.Game.Rulesets.Mania.UI
     {
         public int? Columns;
 
+        private readonly ManiaPlayfield playfield;
+
         public ManiaHitRenderer(WorkingBeatmap beatmap, bool isForCurrentRuleset)
             : base(beatmap, isForCurrentRuleset)
-        {
-        }
-
-        protected override Playfield<ManiaHitObject, ManiaJudgement> CreatePlayfield()
         {
             double lastSpeedMultiplier = 1;
             double lastBeatLength = 500;
@@ -76,7 +76,7 @@ namespace osu.Game.Rulesets.Mania.UI
                 .GroupBy(s => s.BeatLength * s.SpeedMultiplier).Select(g => g.First())
                 .ToList();
 
-            return new ManiaPlayfield(Columns ?? (int)Math.Round(Beatmap.BeatmapInfo.Difficulty.CircleSize), timingChanges)
+            playfield = new ManiaPlayfield(Columns ?? (int)Math.Round(Beatmap.BeatmapInfo.Difficulty.CircleSize), timingChanges)
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
@@ -85,17 +85,17 @@ namespace osu.Game.Rulesets.Mania.UI
             };
         }
 
+        protected override Playfield<ManiaHitObject, ManiaJudgement> CreatePlayfield() => playfield;
+
+        protected override FramedReplayInputHandler CreateReplayInputHandler(Replay replay) => new ManiaFramedReplayInputHandler(playfield.Columns.Select(c => c.Key), replay);
+
         public override ScoreProcessor CreateScoreProcessor() => new ManiaScoreProcessor(this);
 
         protected override BeatmapConverter<ManiaHitObject> CreateBeatmapConverter() => new ManiaBeatmapConverter();
 
         protected override DrawableHitObject<ManiaHitObject, ManiaJudgement> GetVisualRepresentation(ManiaHitObject h)
         {
-            var maniaPlayfield = Playfield as ManiaPlayfield;
-            if (maniaPlayfield == null)
-                return null;
-
-            Bindable<Key> key = maniaPlayfield.Columns.ElementAt(h.Column).Key;
+            Bindable<Key> key = playfield.Columns.ElementAt(h.Column).Key;
 
             var holdNote = h as HoldNote;
             if (holdNote != null)

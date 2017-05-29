@@ -4,6 +4,11 @@
 using osu.Game.Graphics;
 using osu.Game.Rulesets.Mods;
 using System;
+using osu.Game.Rulesets.Mania.Objects;
+using osu.Game.Rulesets.Scoring;
+using osu.Game.Beatmaps;
+using osu.Game.Users;
+using osu.Game.Rulesets.Mania.Replays;
 
 namespace osu.Game.Rulesets.Mania.Mods
 {
@@ -144,5 +149,14 @@ namespace osu.Game.Rulesets.Mania.Mods
         public override string Description => @"Double the key amount, double the fun!";
         public override double ScoreMultiplier => 1;
         public override bool Ranked => true;
+    }
+
+    public class ManiaModAutoplay : ModAutoplay<ManiaHitObject>
+    {
+        protected override Score CreateReplayScore(Beatmap<ManiaHitObject> beatmap) => new Score
+        {
+            User = new User { Username = "osu!topus!" },
+            Replay = new ManiaAutoGenerator(beatmap).Generate(),
+        };
     }
 }
