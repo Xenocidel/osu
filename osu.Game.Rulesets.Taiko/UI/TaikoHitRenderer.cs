@@ -18,20 +18,79 @@ using osu.Game.Rulesets.Taiko.Replays;
 using OpenTK;
 using osu.Game.Rulesets.Beatmaps;
 using System.Linq;
+using System.Collections.Generic;
+using osu.Game.Rulesets.Timing.Drawables;
+using osu.Framework.Lists;
+using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Rulesets.Timing;
+using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Game.Rulesets.Taiko.Timing.Drawables;
 
 namespace osu.Game.Rulesets.Taiko.UI
 {
     public class TaikoHitRenderer : HitRenderer<TaikoHitObject, TaikoJudgement>
     {
+        public List<TimingChange> TimingChanges;
+
         public TaikoHitRenderer(WorkingBeatmap beatmap, bool isForCurrentRuleset)
             : base(beatmap, isForCurrentRuleset)
         {
+            generateDefaultTimingChanges();
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
             loadBarLines();
+        }
+
+        private void generateDefaultTimingChanges()
+        {
+            if (TimingChanges != null)
+                return;
+
+            TimingChanges = new List<TimingChange>();
+
+            double lastSpeedMultiplier = 1;
+            double lastBeatLength = 500;
+
+            // Merge timing + difficulty points
+            var allPoints = new SortedList<ControlPoint>(Comparer<ControlPoint>.Default);
+            allPoints.AddRange(Beatmap.ControlPointInfo.TimingPoints);
+            allPoints.AddRange(Beatmap.ControlPointInfo.DifficultyPoints);
+
+            // Generate the timing points, making non-timing changes use the previous timing change
+            var timingChanges = allPoints.Select(c =>
+            {
+                var timingPoint = c as TimingControlPoint;
+                var difficultyPoint = c as DifficultyControlPoint;
+
+                if (timingPoint != null)
+                    lastBeatLength = timingPoint.BeatLength;
+
+                if (difficultyPoint != null)
+                    lastSpeedMultiplier = difficultyPoint.SpeedMultiplier;
+
+                return new TimingChange
+                {
+                    Time = c.Time,
+                    BeatLength = lastBeatLength,
+                    SpeedMultiplier = lastSpeedMultiplier
+                };
+            });
+
+            double lastObjectTime = (Objects.LastOrDefault() as IHasEndTime)?.EndTime ?? Objects.LastOrDefault()?.StartTime ?? double.MaxValue;
+
+            // Perform some post processing of the timing changes
+            timingChanges = timingChanges
+                // Collapse sections after the last hit object
+                .Where(s => s.Time <= lastObjectTime)
+                // Collapse sections with the same start time
+                .GroupBy(s => s.Time).Select(g => g.Last()).OrderBy(s => s.Time)
+                // Collapse sections with the same beat length
+                .GroupBy(s => s.BeatLength * s.SpeedMultiplier).Select(g => g.First());
+
+            TimingChanges = timingChanges.ToList();
         }
 
         private void loadBarLines()
@@ -72,7 +131,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                 barLine.ApplyDefaults(Beatmap.ControlPointInfo, Beatmap.BeatmapInfo.Difficulty);
 
                 bool isMajor = currentBeat % (int)currentPoint.TimeSignature == 0;
-                taikoPlayfield.AddBarLine(isMajor ? new DrawableBarLineMajor(barLine) : new DrawableBarLine(barLine));
+                taikoPlayfield.Add(isMajor ? new DrawableBarLineMajor(barLine) : new DrawableBarLine(barLine));
 
                 double bl = currentPoint.BeatLength;
                 if (bl < 800)
@@ -98,11 +157,19 @@ namespace osu.Game.Rulesets.Taiko.UI
 
         protected override BeatmapConverter<TaikoHitObject> CreateBeatmapConverter() => new TaikoBeatmapConverter();
 
-        protected override Playfield<TaikoHitObject, TaikoJudgement> CreatePlayfield() => new TaikoPlayfield
+        protected override Playfield<TaikoHitObject, TaikoJudgement> CreatePlayfield()
         {
-            Anchor = Anchor.CentreLeft,
-            Origin = Anchor.CentreLeft
-        };
+            var playfield = new TaikoPlayfield
+            {
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft
+            };
+
+            foreach (var change in TimingChanges)
+                playfield.Add(change);
+
+            return playfield;
+        }
 
         protected override DrawableHitObject<TaikoHitObject, TaikoJudgement> GetVisualRepresentation(TaikoHitObject h)
         {

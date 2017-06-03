@@ -5,13 +5,15 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using OpenTK;
+using osu.Game.Rulesets.Objects.Drawables;
+using System;
 
 namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 {
     /// <summary>
     /// A line that scrolls alongside hit objects in the playfield and visualises control points.
     /// </summary>
-    public class DrawableBarLine : Container
+    public class DrawableBarLine : DrawableTaikoHitObject<BarLine>
     {
         /// <summary>
         /// The width of the line tracker.
@@ -28,15 +30,9 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
         /// </summary>
         protected Box Tracker;
 
-        /// <summary>
-        /// The bar line.
-        /// </summary>
-        protected readonly BarLine BarLine;
-
         public DrawableBarLine(BarLine barLine)
+            : base(barLine)
         {
-            BarLine = barLine;
-
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.Centre;
 
@@ -56,25 +52,16 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                     Alpha = 0.75f
                 }
             };
-
-            LifetimeStart = BarLine.StartTime - BarLine.ScrollTime * 2;
-            LifetimeEnd = BarLine.StartTime + BarLine.ScrollTime;
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            Delay(BarLine.StartTime - Time.Current);
-            FadeOut(base_fadeout_time * BarLine.ScrollTime / 1000);
+            Delay(HitObject.StartTime - Time.Current);
         }
 
-        private void updateScrollPosition(double time) => MoveToX((float)((BarLine.StartTime - time) / BarLine.ScrollTime));
-
-        protected override void Update()
+        protected override void UpdateState(ArmedState state)
         {
-            base.Update();
-
-            updateScrollPosition(Time.Current);
         }
     }
 }

@@ -16,6 +16,9 @@ using osu.Framework.Extensions.Color4Extensions;
 using System.Linq;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using System;
+using osu.Game.Rulesets.Timing.Drawables;
+using osu.Game.Rulesets.Timing;
+using osu.Game.Rulesets.Taiko.Timing.Drawables;
 
 namespace osu.Game.Rulesets.Taiko.UI
 {
@@ -36,14 +39,12 @@ namespace osu.Game.Rulesets.Taiko.UI
         /// </summary>
         private const float left_area_size = 240;
 
-        protected override Container<Drawable> Content => hitObjectContainer;
-
         private readonly Container<HitExplosion> hitExplosionContainer;
         private readonly Container<KiaiHitExplosion> kiaiExplosionContainer;
-        private readonly Container<DrawableBarLine> barLineContainer;
+        private readonly TimingChangeContainer barLineContainer;
         private readonly Container<DrawableTaikoJudgement> judgementContainer;
 
-        private readonly Container hitObjectContainer;
+        private readonly TimingChangeContainer hitObjectContainer;
         private readonly Container topLevelHitContainer;
 
         private readonly Container overlayBackgroundContainer;
@@ -54,7 +55,7 @@ namespace osu.Game.Rulesets.Taiko.UI
 
         public TaikoPlayfield()
         {
-            AddInternal(new Drawable[]
+            Children = new Drawable[]
             {
                 new ScaleFixContainer
                 {
@@ -103,7 +104,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             RelativeSizeAxes = Axes.Y,
                                             BlendingMode = BlendingMode.Additive,
                                         },
-                                        barLineContainer = new Container<DrawableBarLine>
+                                        barLineContainer = new TimingChangeContainer
                                         {
                                             RelativeSizeAxes = Axes.Both,
                                         },
@@ -112,7 +113,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
                                         },
-                                        hitObjectContainer = new Container
+                                        hitObjectContainer = new TimingChangeContainer
                                         {
                                             RelativeSizeAxes = Axes.Both,
                                         },
@@ -169,7 +170,9 @@ namespace osu.Game.Rulesets.Taiko.UI
                     Name = "Top level hit objects",
                     RelativeSizeAxes = Axes.Both,
                 }
-            });
+            };
+
+            hitObjectContainer.TimeSpan = new Vector2(6000, 1);
         }
 
         [BackgroundDependencyLoader]
@@ -186,7 +189,7 @@ namespace osu.Game.Rulesets.Taiko.UI
         {
             h.Depth = (float)h.HitObject.StartTime;
 
-            base.Add(h);
+            hitObjectContainer.Add(h);
 
             // Swells should be moved at the very top of the playfield when they reach the hit target
             var swell = h as DrawableSwell;
@@ -194,10 +197,13 @@ namespace osu.Game.Rulesets.Taiko.UI
                 swell.OnStart += () => topLevelHitContainer.Add(swell.CreateProxy());
         }
 
-        public void AddBarLine(DrawableBarLine barLine)
+        public void Add(TimingChange timingChange)
         {
-            barLineContainer.Add(barLine);
+            hitObjectContainer.Add(new DrawableScrollingTimingChange(timingChange));
+            barLineContainer.Add(new DrawableScrollingTimingChange(timingChange));
         }
+
+        public void Add(DrawableBarLine barLine) => barLineContainer.Add(barLine);
 
         public override void OnJudgement(DrawableHitObject<TaikoHitObject, TaikoJudgement> judgedObject)
         {

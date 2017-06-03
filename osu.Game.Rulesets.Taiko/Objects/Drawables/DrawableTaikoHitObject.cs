@@ -40,9 +40,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             Anchor = Anchor.CentreLeft;
             Origin = Anchor.Custom;
 
-            AutoSizeAxes = Axes.Both;
-
             RelativePositionAxes = Axes.X;
+            X = (float)HitObject.StartTime;
 
             AddInternal(bodyContainer = new Container
             {
@@ -54,25 +53,11 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             });
 
             MainPiece.KiaiMode = HitObject.Kiai;
-
-            LifetimeStart = HitObject.StartTime - HitObject.ScrollTime * 2;
         }
 
         protected override TaikoJudgement CreateJudgement() => new TaikoJudgement();
 
         protected virtual TaikoPiece CreateMainPiece() => new CirclePiece(HitObject.IsStrong);
-
-        /// <summary>
-        /// Sets the scroll position of the DrawableHitObject relative to the offset between
-        /// a time value and the HitObject's StartTime.
-        /// </summary>
-        /// <param name="time"></param>
-        protected virtual void UpdateScrollPosition(double time) => X = (float)((HitObject.StartTime - time) / HitObject.ScrollTime);
-
-        protected override void Update()
-        {
-            UpdateScrollPosition(Time.Current);
-        }
 
         protected virtual bool HandleKeyPress(Key key) => false;
 

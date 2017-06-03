@@ -85,18 +85,14 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 Position = new Vector2(575, 100),
                 AccentColour = Color4.Orange,
-                KiaiMode = kiai,
-                Length = 0.10f,
-                PlayfieldLengthReference = () => DrawSize.X
+                KiaiMode = kiai
             });
 
             Add(new ElongatedCirclePiece(true)
             {
                 Position = new Vector2(575, 300),
                 AccentColour = Color4.Orange,
-                KiaiMode = kiai,
-                Length = 0.10f,
-                PlayfieldLengthReference = () => DrawSize.X
+                KiaiMode = kiai
             });
         }
 

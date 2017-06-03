@@ -8,18 +8,10 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
 {
     public class ElongatedCirclePiece : CirclePiece
     {
-        /// <summary>
-        /// As we are being used to define the absolute size of hits, we need to be given a relative reference of our containing playfield container.
-        /// </summary>
-        public Func<float> PlayfieldLengthReference;
-
-        /// <summary>
-        /// The length of this piece as a multiple of the value returned by <see cref="PlayfieldLengthReference"/>
-        /// </summary>
-        public float Length;
-
-        public ElongatedCirclePiece(bool isStrong = false) : base(isStrong)
+        public ElongatedCirclePiece(bool isStrong = false)
+            : base(isStrong)
         {
+            RelativeSizeAxes = Axes.X;
         }
 
         protected override void Update()
@@ -33,8 +25,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
                 Left = padding,
                 Right = padding,
             };
-
-            Width = (PlayfieldLengthReference?.Invoke() ?? 0) * Length + DrawHeight;
         }
     }
 }

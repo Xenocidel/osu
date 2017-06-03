@@ -203,20 +203,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             Expire();
         }
 
-        protected override void UpdateScrollPosition(double time)
-        {
-            // Make the swell stop at the hit target
-            double t = Math.Min(HitObject.StartTime, time);
-
-            if (t == HitObject.StartTime && !hasStarted)
-            {
-                OnStart?.Invoke();
-                hasStarted = true;
-            }
-
-            base.UpdateScrollPosition(t);
-        }
-
         protected override bool HandleKeyPress(Key key)
         {
             if (Judgement.Result != HitResult.None)

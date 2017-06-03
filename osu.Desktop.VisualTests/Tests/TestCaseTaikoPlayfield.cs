@@ -140,13 +140,9 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addBarLine(bool major, double delay = scroll_time)
         {
-            BarLine bl = new BarLine
-            {
-                StartTime = playfield.Time.Current + delay,
-                ScrollTime = scroll_time
-            };
+            BarLine bl = new BarLine { StartTime = playfield.Time.Current + delay };
 
-            playfield.AddBarLine(major ? new DrawableBarLineMajor(bl) : new DrawableBarLine(bl));
+            playfield.Add(major ? new DrawableBarLineMajor(bl) : new DrawableBarLine(bl));
         }
 
         private void addSwell(double duration = default_duration)
@@ -154,8 +150,7 @@ namespace osu.Desktop.VisualTests.Tests
             playfield.Add(new DrawableSwell(new Swell
             {
                 StartTime = playfield.Time.Current + scroll_time,
-                Duration = duration,
-                ScrollTime = scroll_time
+                Duration = duration
             }));
         }
 
@@ -168,8 +163,7 @@ namespace osu.Desktop.VisualTests.Tests
             {
                 StartTime = playfield.Time.Current + scroll_time,
                 IsStrong = strong,
-                Duration = duration,
-                ScrollTime = scroll_time,
+                Duration = duration
             };
 
             playfield.Add(new DrawableDrumRoll(d));
@@ -177,11 +171,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addCentreHit(bool strong)
         {
-            Hit h = new Hit
-            {
-                StartTime = playfield.Time.Current + scroll_time,
-                ScrollTime = scroll_time
-            };
+            Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
             if (strong)
                 playfield.Add(new DrawableCentreHitStrong(h));
@@ -191,11 +181,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addRimHit(bool strong)
         {
-            Hit h = new Hit
-            {
-                StartTime = playfield.Time.Current + scroll_time,
-                ScrollTime = scroll_time
-            };
+            Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
             if (strong)
                 playfield.Add(new DrawableRimHitStrong(h));
