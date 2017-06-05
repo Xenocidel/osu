@@ -31,6 +31,8 @@ namespace osu.Game.Rulesets.Mania.Scoring
         /// </summary>
         private const double accuracy_portion_max = max_score * 0.8;
 
+        public override bool HasFailed => false;
+
         /// <summary>
         /// The factor used to determine relevance of combos.
         /// </summary>

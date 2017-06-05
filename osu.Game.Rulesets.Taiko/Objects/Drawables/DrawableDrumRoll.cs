@@ -11,6 +11,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Primitives;
 
 namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 {
@@ -45,7 +46,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 MainPiece.Add(newTick);
             }
 
-            RelativeCoordinateSpace = new Vector2(Width, 1);
+            RelativeCoordinateSpace = new RectangleF(0, 0, Width, 1);
         }
 
         protected override TaikoJudgement CreateJudgement() => new TaikoJudgement { SecondHit = HitObject.IsStrong };
