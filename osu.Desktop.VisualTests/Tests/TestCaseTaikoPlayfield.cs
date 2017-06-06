@@ -13,6 +13,7 @@ using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using osu.Game.Rulesets.Taiko.UI;
 using System;
+using osu.Game.Rulesets.Timing;
 
 namespace osu.Desktop.VisualTests.Tests
 {
@@ -140,6 +141,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addBarLine(bool major, double delay = scroll_time)
         {
+            playfield.Add(new TimingChange());
+
             BarLine bl = new BarLine { StartTime = playfield.Time.Current + delay };
 
             playfield.Add(major ? new DrawableBarLineMajor(bl) : new DrawableBarLine(bl));
@@ -147,6 +150,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addSwell(double duration = default_duration)
         {
+            playfield.Add(new TimingChange());
+
             playfield.Add(new DrawableSwell(new Swell
             {
                 StartTime = playfield.Time.Current + scroll_time,
@@ -158,6 +163,8 @@ namespace osu.Desktop.VisualTests.Tests
         {
             addBarLine(true);
             addBarLine(true, scroll_time + duration);
+
+            playfield.Add(new TimingChange());
 
             var d = new DrumRoll
             {
@@ -171,6 +178,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addCentreHit(bool strong)
         {
+            playfield.Add(new TimingChange());
+
             Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
             if (strong)
@@ -181,6 +190,8 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addRimHit(bool strong)
         {
+            playfield.Add(new TimingChange());
+
             Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
             if (strong)
