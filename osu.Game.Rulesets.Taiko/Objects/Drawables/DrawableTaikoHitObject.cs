@@ -24,11 +24,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 
         public override Vector2 OriginPosition => new Vector2(DrawHeight / 2);
 
-        protected override Container<Drawable> Content => bodyContainer;
-
         protected readonly TaikoPiece MainPiece;
-
-        private readonly Container bodyContainer;
 
         public new TaikoHitType HitObject;
 
@@ -43,15 +39,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             RelativePositionAxes = Axes.X;
             X = (float)HitObject.StartTime;
 
-            AddInternal(bodyContainer = new Container
-            {
-                AutoSizeAxes = Axes.Both,
-                Children = new[]
-                {
-                    MainPiece = CreateMainPiece()
-                }
-            });
-
+            Add(MainPiece = CreateMainPiece());
             MainPiece.KiaiMode = HitObject.Kiai;
         }
 

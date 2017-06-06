@@ -15,6 +15,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
         public DrawableDrumRollTick(DrumRollTick tick)
             : base(tick)
         {
+            AutoSizeAxes = Axes.Both;
         }
 
         protected override TaikoPiece CreateMainPiece() => new TickPiece

@@ -11,7 +11,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
         public ElongatedCirclePiece(bool isStrong = false)
             : base(isStrong)
         {
-            RelativeSizeAxes = Axes.X;
         }
 
         protected override void Update()
@@ -25,6 +24,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
                 Left = padding,
                 Right = padding,
             };
+
+            Width = Parent.DrawSize.X + Content.DrawHeight;
         }
     }
 }

@@ -46,8 +46,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 MainPiece.Add(newTick);
             }
 
-            RelativeChildOffset = new Vector2((float)HitObject.StartTime, 0);
-            RelativeChildSize = new Vector2((float)HitObject.Duration, 1);
+            MainPiece.InnerContent.RelativeChildOffset = new Vector2((float)HitObject.StartTime, 0);
+            MainPiece.InnerContent.RelativeChildSize = new Vector2((float)HitObject.Duration, 1);
         }
 
         protected override TaikoJudgement CreateJudgement() => new TaikoJudgement { SecondHit = HitObject.IsStrong };
