@@ -25,6 +25,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
                 Right = padding,
             };
 
+            // The circle piece ends are rounded with radius = DrawHeight / 2, so the width needs to be increased by the diameter
+            // otherwise the hit object start/end times of the hit object will lie on the border of the circle piece
             Width = Parent.DrawSize.X + Content.DrawHeight;
         }
     }

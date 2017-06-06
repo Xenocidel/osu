@@ -35,8 +35,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces
             }
         }
 
-        public Container<Drawable> InnerContent => Content;
-
         public TaikoPiece()
         {
             //just a default

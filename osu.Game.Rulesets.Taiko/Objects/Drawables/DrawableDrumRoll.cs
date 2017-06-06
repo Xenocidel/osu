@@ -12,6 +12,7 @@ using OpenTK.Graphics;
 using osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Containers;
 
 namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 {
@@ -36,6 +37,14 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             RelativeSizeAxes = Axes.X;
             Width = (float)HitObject.Duration;
 
+            Container<DrawableDrumRollTick> tickContainer;
+            MainPiece.Add(tickContainer = new Container<DrawableDrumRollTick>
+            {
+                RelativeSizeAxes = Axes.Both,
+                RelativeChildOffset = new Vector2((float)HitObject.StartTime, 0),
+                RelativeChildSize = new Vector2((float)HitObject.Duration, 1)
+            });
+
             foreach (var tick in drumRoll.Ticks)
             {
                 var newTick = new DrawableDrumRollTick(tick);
@@ -43,11 +52,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 newTick.OnJudgement += onTickJudgement;
 
                 AddNested(newTick);
-                MainPiece.Add(newTick);
+                tickContainer.Add(newTick);
             }
-
-            MainPiece.InnerContent.RelativeChildOffset = new Vector2((float)HitObject.StartTime, 0);
-            MainPiece.InnerContent.RelativeChildSize = new Vector2((float)HitObject.Duration, 1);
         }
 
         protected override TaikoJudgement CreateJudgement() => new TaikoJudgement { SecondHit = HitObject.IsStrong };
