@@ -76,6 +76,7 @@ namespace osu.Game.Rulesets.Taiko
                                 new ModCinema(),
                             },
                         },
+                        new TaikoModGravity()
                     };
 
                 default:
