@@ -57,6 +57,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 bodyContainer = new Container
                 {
                     AutoSizeAxes = Axes.Both,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
                     Children = new Drawable[]
                     {
                         expandingRing = new CircularContainer
@@ -174,6 +176,21 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 }
                 else
                     Judgement.Result = HitResult.Miss;
+            }
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            X = (float)Math.Max(Time.Current, HitObject.StartTime);
+
+            double t = Math.Min(HitObject.StartTime, Time.Current);
+
+            if (t == HitObject.StartTime && !hasStarted)
+            {
+                OnStart?.Invoke();
+                hasStarted = true;
             }
         }
 
