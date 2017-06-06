@@ -43,7 +43,7 @@ namespace osu.Game.Rulesets.Timing.Drawables
             {
                 RelativeSizeAxes = Axes.Both,
                 RelativePositionAxes = Axes.Both,
-                RelativeCoordinateSpace = new RectangleF((scrollingAxes & Axes.X) > 0 ? (float)TimingChange.Time : 0, (scrollingAxes & Axes.Y) > 0 ? (float)TimingChange.Time : 0, 1, 1)
+                RelativeChildOffset = new Vector2((scrollingAxes & Axes.X) > 0 ? (float)TimingChange.Time : 0, (scrollingAxes & Axes.Y) > 0 ? (float)TimingChange.Time : 0)
             });
         }
 
@@ -64,7 +64,7 @@ namespace osu.Game.Rulesets.Timing.Drawables
             float speedAdjustedSize = (float)(1000 / TimingChange.BeatLength / TimingChange.SpeedMultiplier);
 
             Size = new Vector2((scrollingAxes & Axes.X) > 0 ? speedAdjustedSize : 1, (scrollingAxes & Axes.Y) > 0 ? speedAdjustedSize : 1);
-            RelativeCoordinateSpace = new RectangleF(0, 0, (scrollingAxes & Axes.X) > 0 ? parent.TimeSpan.X : 1, (scrollingAxes & Axes.Y) > 0 ? parent.TimeSpan.Y : 1);
+            RelativeChildSize = new Vector2((scrollingAxes & Axes.X) > 0 ? parent.TimeSpan.X : 1, (scrollingAxes & Axes.Y) > 0 ? parent.TimeSpan.Y : 1);
         }
 
         /// <summary>
@@ -124,16 +124,7 @@ namespace osu.Game.Rulesets.Timing.Drawables
                         float height = Children.Select(child => child.Y + child.Height).Max() - RelativeChildOffset.Y;
 
                         Size = new Vector2((autoSizingAxes & Axes.X) > 0 ? width : Size.X, (autoSizingAxes & Axes.Y) > 0 ? height : Size.Y);
-
-                        var space = RelativeCoordinateSpace;
-
-                        if ((autoSizingAxes & Axes.X) > 0)
-                            space.Width = width;
-
-                        if ((autoSizingAxes & Axes.Y) > 0)
-                            space.Height = height;
-
-                        RelativeCoordinateSpace = space;
+                        RelativeChildSize = new Vector2((autoSizingAxes & Axes.X) > 0 ? width : 1, (autoSizingAxes & Axes.Y) > 0 ? height : 1);
                     });
                 }
             }

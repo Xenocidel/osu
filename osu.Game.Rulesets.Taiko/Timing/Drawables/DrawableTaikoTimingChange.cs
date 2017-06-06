@@ -25,7 +25,7 @@ namespace osu.Game.Rulesets.Taiko.Timing.Drawables
 
             // This is very naive and can be improved, but is adequate for now
             LifetimeStart = TimingChange.Time - parent.TimeSpan.X;
-            LifetimeEnd = TimingChange.Time + Content.RelativeCoordinateSpace.X * 2;
+            LifetimeEnd = TimingChange.Time + Content.RelativeChildSize.X * 2;
         }
     }
 }
