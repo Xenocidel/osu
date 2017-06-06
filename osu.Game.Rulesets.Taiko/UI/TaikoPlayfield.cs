@@ -93,16 +93,24 @@ namespace osu.Game.Rulesets.Taiko.UI
                             {
                                 new Container
                                 {
-                                    Name = "Masked elements",
+                                    Name = "Hit target padded container",
                                     RelativeSizeAxes = Axes.Both,
                                     Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                                    Masking = true,
                                     Children = new Drawable[]
                                     {
-                                        hitExplosionContainer = new Container<HitExplosion>
+                                        new Container
                                         {
-                                            RelativeSizeAxes = Axes.Y,
-                                            BlendingMode = BlendingMode.Additive,
+                                            Name = "Hit explosions mask",
+                                            RelativeSizeAxes = Axes.Both,
+                                            Masking = true,
+                                            Children = new Drawable[]
+                                            {
+                                                hitExplosionContainer = new Container<HitExplosion>
+                                                {
+                                                    RelativeSizeAxes = Axes.Y,
+                                                    BlendingMode = BlendingMode.Additive,
+                                                },
+                                            }
                                         },
                                         barLineContainer = new TimingChangeContainer
                                         {
@@ -113,9 +121,18 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
                                         },
-                                        hitObjectContainer = new TimingChangeContainer
+                                        new Container
                                         {
+                                            Name = "Hit objects mask",
                                             RelativeSizeAxes = Axes.Both,
+                                            Masking = true,
+                                            Children = new Drawable[]
+                                            {
+                                                hitObjectContainer = new TimingChangeContainer
+                                                {
+                                                    RelativeSizeAxes = Axes.Both,
+                                                },
+                                            }
                                         },
                                     }
                                 },
@@ -173,6 +190,7 @@ namespace osu.Game.Rulesets.Taiko.UI
             };
 
             hitObjectContainer.TimeSpan = new Vector2(6000, 1);
+            barLineContainer.TimeSpan = new Vector2(6000, 1);
         }
 
         [BackgroundDependencyLoader]
