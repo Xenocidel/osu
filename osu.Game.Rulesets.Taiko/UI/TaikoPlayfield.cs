@@ -93,46 +93,62 @@ namespace osu.Game.Rulesets.Taiko.UI
                             {
                                 new Container
                                 {
-                                    Name = "Hit target padded container",
+                                    Name = "Hit explosion mask",
                                     RelativeSizeAxes = Axes.Both,
                                     Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
-                                    Children = new Drawable[]
+                                    Masking = true,
+                                    Children = new[]
+                                    {
+                                        hitExplosionContainer = new Container<HitExplosion>
+                                        {
+                                            RelativeSizeAxes = Axes.Y,
+                                            BlendingMode = BlendingMode.Additive,
+                                        },
+                                    }
+                                },
+                                new Container
+                                {
+                                    Name = "Bar line mask",
+                                    RelativeSizeAxes = Axes.Both,
+                                    // A "sane" value because we only want to mask along one axis
+                                    Y = 4,
+                                    Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
+                                    Masking = true,
+                                    Children = new[]
                                     {
                                         new Container
                                         {
-                                            Name = "Hit explosions mask",
+                                            Name = "Bar line re-sizer",
                                             RelativeSizeAxes = Axes.Both,
-                                            Masking = true,
-                                            Children = new Drawable[]
+                                            // Inverse of the bar line mask so we get them back to their original size
+                                            Y = 0.25f,
+                                            Children = new[]
                                             {
-                                                hitExplosionContainer = new Container<HitExplosion>
+                                                barLineContainer = new TimingChangeContainer
                                                 {
-                                                    RelativeSizeAxes = Axes.Y,
-                                                    BlendingMode = BlendingMode.Additive,
+                                                    RelativeSizeAxes = Axes.Both,
                                                 },
                                             }
-                                        },
-                                        barLineContainer = new TimingChangeContainer
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                        },
+                                        }
+
+                                    }
+                                },
+                                new Container
+                                {
+                                    Name = "Hit objects mask",
+                                    RelativeSizeAxes = Axes.Both,
+                                    Padding = new MarginPadding { Left = HIT_TARGET_OFFSET },
+                                    Masking = true,
+                                    Children = new Drawable[]
+                                    {
                                         new HitTarget
                                         {
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
                                         },
-                                        new Container
+                                        hitObjectContainer = new TimingChangeContainer
                                         {
-                                            Name = "Hit objects mask",
                                             RelativeSizeAxes = Axes.Both,
-                                            Masking = true,
-                                            Children = new Drawable[]
-                                            {
-                                                hitObjectContainer = new TimingChangeContainer
-                                                {
-                                                    RelativeSizeAxes = Axes.Both,
-                                                },
-                                            }
                                         },
                                     }
                                 },
