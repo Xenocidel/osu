@@ -7,9 +7,9 @@ using osu.Game.Rulesets.Timing.Drawables;
 
 namespace osu.Game.Rulesets.Mania.Timing.Drawables
 {
-    public class DrawableManiaTimingChange : DrawableTimingChange
+    public abstract class DrawableManiaTimingChange : DrawableTimingChange
     {
-        public DrawableManiaTimingChange(TimingChange timingChange)
+        protected DrawableManiaTimingChange(TimingChange timingChange)
             : base(timingChange, Axes.Y)
         {
         }
@@ -24,7 +24,7 @@ namespace osu.Game.Rulesets.Mania.Timing.Drawables
                 return;
 
             // This is very naive and can be improved, but is adequate for now
-            LifetimeStart = TimingChange.Time - parent.TimeSpan.Y;
+            LifetimeStart = TimingChange.Time - parent.TimeSpan;
             LifetimeEnd = TimingChange.Time + Content.RelativeChildSize.Y * 2;
         }
     }

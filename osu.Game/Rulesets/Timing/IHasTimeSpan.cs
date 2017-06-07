@@ -2,7 +2,6 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using osu.Framework.Graphics.Containers;
-using OpenTK;
 
 namespace osu.Game.Rulesets.Timing
 {
@@ -14,6 +13,6 @@ namespace osu.Game.Rulesets.Timing
         /// <summary>
         /// The amount of time which this container spans.
         /// </summary>
-        Vector2 TimeSpan { get; }
+        double TimeSpan { get; }
     }
 }
