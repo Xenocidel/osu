@@ -2,9 +2,9 @@ using osu.Game.Rulesets.Timing;
 
 namespace osu.Game.Rulesets.Taiko.Timing.Drawables
 {
-    public class DrawableGravityTimingChange : DrawableTaikoTimingChange
+    public class DrawableTaikoGravityTimingChange : DrawableTaikoTimingChange
     {
-        public DrawableGravityTimingChange(TimingChange timingChange)
+        public DrawableTaikoGravityTimingChange(TimingChange timingChange)
             : base(timingChange)
         {
         }

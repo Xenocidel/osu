@@ -235,8 +235,8 @@ namespace osu.Game.Rulesets.Taiko.UI
 
         public void Add(TimingChange timingChange)
         {
-            hitObjectContainer.Add(new DrawableScrollingTimingChange(timingChange));
-            barLineContainer.Add(new DrawableScrollingTimingChange(timingChange));
+            hitObjectContainer.Add(new DrawableTaikoScrollingTimingChange(timingChange));
+            barLineContainer.Add(new DrawableTaikoScrollingTimingChange(timingChange));
         }
 
         public void Add(DrawableBarLine barLine) => barLineContainer.Add(barLine);

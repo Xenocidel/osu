@@ -5,9 +5,9 @@ using osu.Game.Rulesets.Timing;
 
 namespace osu.Game.Rulesets.Taiko.Timing.Drawables
 {
-    public class DrawableScrollingTimingChange : DrawableTaikoTimingChange
+    public class DrawableTaikoScrollingTimingChange : DrawableTaikoTimingChange
     {
-        public DrawableScrollingTimingChange(TimingChange timingChange)
+        public DrawableTaikoScrollingTimingChange(TimingChange timingChange)
             : base(timingChange)
         {
         }
