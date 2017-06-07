@@ -39,6 +39,8 @@ namespace osu.Game.Rulesets.Taiko.UI
         /// </summary>
         private const float left_area_size = 240;
 
+        private const double time_span_default = 6000;
+
         private readonly Container<HitExplosion> hitExplosionContainer;
         private readonly Container<KiaiHitExplosion> kiaiExplosionContainer;
         private readonly TimingChangeContainer barLineContainer;
@@ -205,8 +207,8 @@ namespace osu.Game.Rulesets.Taiko.UI
                 }
             };
 
-            hitObjectContainer.TimeSpan = new Vector2(6000, 1);
-            barLineContainer.TimeSpan = new Vector2(6000, 1);
+            hitObjectContainer.TimeSpan = time_span_default;
+            barLineContainer.TimeSpan = time_span_default;
         }
 
         [BackgroundDependencyLoader]
