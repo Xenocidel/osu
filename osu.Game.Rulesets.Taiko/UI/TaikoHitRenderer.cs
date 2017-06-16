@@ -19,23 +19,63 @@ using OpenTK;
 using osu.Game.Rulesets.Beatmaps;
 using System.Linq;
 using System.Collections.Generic;
-using osu.Game.Rulesets.Timing.Drawables;
 using osu.Framework.Lists;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Rulesets.Timing;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Rulesets.Taiko.Timing.Drawables;
+using System;
+using osu.Framework.MathUtils;
+using osu.Game.Rulesets.Taiko.Mods;
+using osu.Game.Rulesets.Taiko.Timing;
 
 namespace osu.Game.Rulesets.Taiko.UI
 {
-    public class TaikoHitRenderer : HitRenderer<TaikoHitObject, TaikoJudgement>
+    public class TaikoHitRenderer : SpeedAdjustedHitRenderer<TaikoHitObject, TaikoJudgement>
     {
-        public List<TimingChange> TimingChanges;
+        public readonly IEnumerable<DrawableBarLine> BarLines;
+
+        private readonly List<SpeedAdjustmentContainer> hitObjectSpeedAdjustments = new List<SpeedAdjustmentContainer>();
+        private readonly List<SpeedAdjustmentContainer> barLineSpeedAdjustments = new List<SpeedAdjustmentContainer>();
 
         public TaikoHitRenderer(WorkingBeatmap beatmap, bool isForCurrentRuleset)
             : base(beatmap, isForCurrentRuleset)
         {
-            generateDefaultTimingChanges();
+            // Generate the bar lines
+            double lastObjectTime = (Objects.LastOrDefault() as IHasEndTime)?.EndTime ?? Objects.LastOrDefault()?.StartTime ?? double.MaxValue;
+
+            SortedList<TimingControlPoint> timingPoints = Beatmap.ControlPointInfo.TimingPoints;
+            var barLines = new List<DrawableBarLine>();
+
+            for (int i = 0; i < timingPoints.Count; i++)
+            {
+                TimingControlPoint point = timingPoints[i];
+
+                // Stop on the beat before the next timing point, or if there is no next timing point stop slightly past the last object
+                double endTime = i < timingPoints.Count - 1 ? timingPoints[i + 1].Time - point.BeatLength : lastObjectTime + point.BeatLength * (int)point.TimeSignature;
+
+                int index = 0;
+                for (double t = timingPoints[i].Time; Precision.DefinitelyBigger(endTime, t); t += point.BeatLength, index++)
+                    barLines.Add(new DrawableBarLine(new BarLine { StartTime = t }));
+            }
+
+            BarLines = barLines;
+
+            // Generate speed adjustments from mods first
+            bool useDefaultSpeedAdjustments = true;
+
+            if (Mods != null)
+            {
+                foreach (var speedAdjustmentMod in Mods.OfType<IGenerateSpeedAdjustments>())
+                {
+                    useDefaultSpeedAdjustments = false;
+                    speedAdjustmentMod.ApplyToHitRenderer(this, ref hitObjectSpeedAdjustments, ref barLineSpeedAdjustments);
+                }
+            }
+
+            // Generate the default speed adjustments
+            if (useDefaultSpeedAdjustments)
+                generateDefaultSpeedAdjustments();
         }
 
         [BackgroundDependencyLoader]
@@ -44,53 +84,24 @@ namespace osu.Game.Rulesets.Taiko.UI
             loadBarLines();
         }
 
-        private void generateDefaultTimingChanges()
+        protected override void ApplySpeedAdjustments()
         {
-            if (TimingChanges != null)
-                return;
+            var taikoPlayfield = (TaikoPlayfield)Playfield;
 
-            TimingChanges = new List<TimingChange>();
+            foreach (var speedAdjustment in hitObjectSpeedAdjustments)
+                taikoPlayfield.AddHitObjectSpeedAdjustment(speedAdjustment);
 
-            double lastSpeedMultiplier = 1;
-            double lastBeatLength = 500;
+            foreach (var speedAdjustment in barLineSpeedAdjustments)
+                taikoPlayfield.AddBarLineSpeedAdjustment(speedAdjustment);
+        }
 
-            // Merge timing + difficulty points
-            var allPoints = new SortedList<ControlPoint>(Comparer<ControlPoint>.Default);
-            allPoints.AddRange(Beatmap.ControlPointInfo.TimingPoints);
-            allPoints.AddRange(Beatmap.ControlPointInfo.DifficultyPoints);
-
-            // Generate the timing points, making non-timing changes use the previous timing change
-            var timingChanges = allPoints.Select(c =>
+        private void generateDefaultSpeedAdjustments()
+        {
+            DefaultControlPoints.ForEach(c =>
             {
-                var timingPoint = c as TimingControlPoint;
-                var difficultyPoint = c as DifficultyControlPoint;
-
-                if (timingPoint != null)
-                    lastBeatLength = timingPoint.BeatLength;
-
-                if (difficultyPoint != null)
-                    lastSpeedMultiplier = difficultyPoint.SpeedMultiplier;
-
-                return new TimingChange
-                {
-                    Time = c.Time,
-                    BeatLength = lastBeatLength,
-                    SpeedMultiplier = lastSpeedMultiplier
-                };
+                hitObjectSpeedAdjustments.Add(new TaikoSpeedAdjustmentContainer(c, ScrollingAlgorithm.Basic));
+                barLineSpeedAdjustments.Add(new TaikoSpeedAdjustmentContainer(c, ScrollingAlgorithm.Basic));
             });
-
-            double lastObjectTime = (Objects.LastOrDefault() as IHasEndTime)?.EndTime ?? Objects.LastOrDefault()?.StartTime ?? double.MaxValue;
-
-            // Perform some post processing of the timing changes
-            timingChanges = timingChanges
-                // Collapse sections after the last hit object
-                .Where(s => s.Time <= lastObjectTime)
-                // Collapse sections with the same start time
-                .GroupBy(s => s.Time).Select(g => g.Last()).OrderBy(s => s.Time)
-                // Collapse sections with the same beat length
-                .GroupBy(s => s.BeatLength * s.SpeedMultiplier).Select(g => g.First());
-
-            TimingChanges = timingChanges.ToList();
         }
 
         private void loadBarLines()
@@ -152,12 +163,11 @@ namespace osu.Game.Rulesets.Taiko.UI
             return new Vector2(1, default_relative_height * aspectAdjust);
         }
 
-
         public override ScoreProcessor CreateScoreProcessor() => new TaikoScoreProcessor(this);
 
         protected override BeatmapConverter<TaikoHitObject> CreateBeatmapConverter() => new TaikoBeatmapConverter();
 
-        protected override Playfield<TaikoHitObject, TaikoJudgement> CreatePlayfield()
+        protected sealed override Playfield<TaikoHitObject, TaikoJudgement> CreatePlayfield()
         {
             var playfield = new TaikoPlayfield
             {
@@ -165,8 +175,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                 Origin = Anchor.CentreLeft
             };
 
-            foreach (var change in TimingChanges)
-                playfield.Add(change);
+
 
             return playfield;
         }

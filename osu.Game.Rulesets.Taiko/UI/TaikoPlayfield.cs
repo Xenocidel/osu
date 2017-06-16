@@ -16,9 +16,13 @@ using osu.Framework.Extensions.Color4Extensions;
 using System.Linq;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using System;
-using osu.Game.Rulesets.Timing.Drawables;
 using osu.Game.Rulesets.Timing;
 using osu.Game.Rulesets.Taiko.Timing.Drawables;
+using osu.Framework.Configuration;
+using osu.Framework.Input;
+using osu.Framework.Graphics.Transforms;
+using osu.Framework.MathUtils;
+using OpenTK.Input;
 
 namespace osu.Game.Rulesets.Taiko.UI
 {
@@ -40,13 +44,22 @@ namespace osu.Game.Rulesets.Taiko.UI
         private const float left_area_size = 240;
 
         private const double time_span_default = 6000;
+        private const double time_span_min = 50;
+        private const double time_span_max = 10000;
+        private const double time_span_step = 50;
+
+        private readonly BindableDouble visibleTimeRange = new BindableDouble(time_span_default)
+        {
+            MinValue = time_span_min,
+            MaxValue = time_span_max
+        };
 
         private readonly Container<HitExplosion> hitExplosionContainer;
         private readonly Container<KiaiHitExplosion> kiaiExplosionContainer;
-        private readonly TimingChangeContainer barLineContainer;
+        private readonly SpeedAdjustmentCollection barLineContainer;
         private readonly Container<DrawableTaikoJudgement> judgementContainer;
 
-        private readonly TimingChangeContainer hitObjectContainer;
+        private readonly SpeedAdjustmentCollection hitObjectContainer;
         private readonly Container topLevelHitContainer;
 
         private readonly Container overlayBackgroundContainer;
@@ -126,9 +139,10 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Y = 0.25f,
                                             Children = new[]
                                             {
-                                                barLineContainer = new TimingChangeContainer
+                                                barLineContainer = new SpeedAdjustmentCollection
                                                 {
                                                     RelativeSizeAxes = Axes.Both,
+                                                    VisibleTimeRange = visibleTimeRange
                                                 },
                                             }
                                         }
@@ -148,9 +162,10 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
                                         },
-                                        hitObjectContainer = new TimingChangeContainer
+                                        hitObjectContainer = new SpeedAdjustmentCollection
                                         {
                                             RelativeSizeAxes = Axes.Both,
+                                            VisibleTimeRange = visibleTimeRange
                                         },
                                     }
                                 },
@@ -206,9 +221,6 @@ namespace osu.Game.Rulesets.Taiko.UI
                     RelativeSizeAxes = Axes.Both,
                 }
             };
-
-            hitObjectContainer.TimeSpan = time_span_default;
-            barLineContainer.TimeSpan = time_span_default;
         }
 
         [BackgroundDependencyLoader]
@@ -219,6 +231,24 @@ namespace osu.Game.Rulesets.Taiko.UI
 
             backgroundContainer.BorderColour = colours.Gray1;
             background.Colour = colours.Gray0;
+        }
+
+        protected override bool OnKeyDown(InputState state, KeyDownEventArgs args)
+        {
+            if (state.Keyboard.ControlPressed)
+            {
+                switch (args.Key)
+                {
+                    case Key.Minus:
+                        transformVisibleTimeRangeTo(visibleTimeRange + time_span_step, 200, EasingTypes.OutQuint);
+                        break;
+                    case Key.Plus:
+                        transformVisibleTimeRangeTo(visibleTimeRange - time_span_step, 200, EasingTypes.OutQuint);
+                        break;
+                }
+            }
+
+            return false;
         }
 
         public override void Add(DrawableHitObject<TaikoHitObject, TaikoJudgement> h)
@@ -233,13 +263,10 @@ namespace osu.Game.Rulesets.Taiko.UI
                 swell.OnStart += () => topLevelHitContainer.Add(swell.CreateProxy());
         }
 
-        public void Add(TimingChange timingChange)
-        {
-            hitObjectContainer.Add(new DrawableTaikoScrollingTimingChange(timingChange));
-            barLineContainer.Add(new DrawableTaikoScrollingTimingChange(timingChange));
-        }
-
         public void Add(DrawableBarLine barLine) => barLineContainer.Add(barLine);
+
+        public void AddBarLineSpeedAdjustment(SpeedAdjustmentContainer speedAdjustment) => barLineContainer.Add(speedAdjustment);
+        public void AddHitObjectSpeedAdjustment(SpeedAdjustmentContainer speedAdjustment) => hitObjectContainer.Add(speedAdjustment);
 
         public override void OnJudgement(DrawableHitObject<TaikoHitObject, TaikoJudgement> judgedObject)
         {
@@ -274,6 +301,11 @@ namespace osu.Game.Rulesets.Taiko.UI
             }
             else
                 hitExplosionContainer.Children.FirstOrDefault(e => e.Judgement == judgedObject.Judgement)?.VisualiseSecondHit();
+        }
+
+        private void transformVisibleTimeRangeTo(double newTimeRange, double duration = 0, EasingTypes easing = EasingTypes.None)
+        {
+            TransformTo(() => visibleTimeRange.Value, newTimeRange, duration, easing, new TransformTimeSpan());
         }
 
         /// <summary>
@@ -324,6 +356,29 @@ namespace osu.Game.Rulesets.Taiko.UI
                     // Reverse the DrawScale adjustment
                     Width = Parent.DrawSize.X / ParentDrawScaleReference();
                 }
+            }
+        }
+
+        private class TransformTimeSpan : Transform<double>
+        {
+            public override double CurrentValue
+            {
+                get
+                {
+                    double time = Time?.Current ?? 0;
+                    if (time < StartTime) return StartValue;
+                    if (time >= EndTime) return EndValue;
+
+                    return Interpolation.ValueAt(time, StartValue, EndValue, StartTime, EndTime, Easing);
+                }
+            }
+
+            public override void Apply(Drawable d)
+            {
+                base.Apply(d);
+
+                var p = (TaikoPlayfield)d;
+                p.visibleTimeRange.Value = (float)CurrentValue;
             }
         }
     }
