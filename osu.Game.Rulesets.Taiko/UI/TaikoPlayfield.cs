@@ -138,7 +138,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Y = 0.25f,
                                             Children = new[]
                                             {
-                                                barLineContainer = new SpeedAdjustmentCollection
+                                                barLineContainer = new SpeedAdjustmentCollection(Axes.X)
                                                 {
                                                     RelativeSizeAxes = Axes.Both,
                                                     VisibleTimeRange = visibleTimeRange
@@ -161,7 +161,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
                                         },
-                                        hitObjectContainer = new SpeedAdjustmentCollection
+                                        hitObjectContainer = new SpeedAdjustmentCollection(Axes.X)
                                         {
                                             RelativeSizeAxes = Axes.Both,
                                             VisibleTimeRange = visibleTimeRange
