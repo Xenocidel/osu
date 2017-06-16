@@ -45,8 +45,6 @@ namespace osu.Game.Rulesets.Taiko.Objects
         {
             base.ApplyDefaults(controlPointInfo, difficulty);
 
-            TimingControlPoint timingPoint = controlPointInfo.TimingPointAt(StartTime);
-            DifficultyControlPoint difficultyPoint = controlPointInfo.DifficultyPointAt(StartTime);
             EffectControlPoint effectPoint = controlPointInfo.EffectPointAt(StartTime);
 
             Kiai |= effectPoint.KiaiMode;

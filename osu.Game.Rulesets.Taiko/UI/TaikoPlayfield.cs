@@ -17,7 +17,6 @@ using System.Linq;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using System;
 using osu.Game.Rulesets.Timing;
-using osu.Game.Rulesets.Taiko.Timing.Drawables;
 using osu.Framework.Configuration;
 using osu.Framework.Input;
 using osu.Framework.Graphics.Transforms;
@@ -288,7 +287,7 @@ namespace osu.Game.Rulesets.Taiko.UI
 
             if (!secondHit)
             {
-                if (judgedObject.X >= -0.05f && (judgedObject is DrawableHit))
+                if (judgedObject.X >= -0.05f && judgedObject is DrawableHit)
                 {
                     // If we're far enough away from the left stage, we should bring outselves in front of it
                     topLevelHitContainer.Add(judgedObject.CreateProxy());

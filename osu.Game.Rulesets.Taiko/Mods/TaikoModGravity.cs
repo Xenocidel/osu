@@ -1,15 +1,11 @@
-using System;
 using System.Collections.Generic;
 using osu.Game.Graphics;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko.Objects;
 using osu.Game.Rulesets.Taiko.Objects.Drawables;
 using osu.Game.Rulesets.Taiko.Timing;
-using osu.Game.Rulesets.Taiko.Timing.Drawables;
 using osu.Game.Rulesets.Taiko.UI;
 using osu.Game.Rulesets.Timing;
-using osu.Game.Rulesets.UI;
 
 namespace osu.Game.Rulesets.Taiko.Mods
 {

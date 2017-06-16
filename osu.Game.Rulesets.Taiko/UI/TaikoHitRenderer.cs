@@ -22,9 +22,6 @@ using System.Collections.Generic;
 using osu.Framework.Lists;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Rulesets.Timing;
-using osu.Framework.Extensions.IEnumerableExtensions;
-using osu.Game.Rulesets.Taiko.Timing.Drawables;
-using System;
 using osu.Framework.MathUtils;
 using osu.Game.Rulesets.Taiko.Mods;
 using osu.Game.Rulesets.Taiko.Timing;
@@ -54,8 +51,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                 // Stop on the beat before the next timing point, or if there is no next timing point stop slightly past the last object
                 double endTime = i < timingPoints.Count - 1 ? timingPoints[i + 1].Time - point.BeatLength : lastObjectTime + point.BeatLength * (int)point.TimeSignature;
 
-                int index = 0;
-                for (double t = timingPoints[i].Time; Precision.DefinitelyBigger(endTime, t); t += point.BeatLength, index++)
+                for (double t = timingPoints[i].Time; Precision.DefinitelyBigger(endTime, t); t += point.BeatLength)
                     barLines.Add(new DrawableBarLine(new BarLine { StartTime = t }));
             }
 

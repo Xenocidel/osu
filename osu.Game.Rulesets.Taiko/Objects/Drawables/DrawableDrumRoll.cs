@@ -11,7 +11,6 @@ using OpenTK;
 using OpenTK.Graphics;
 using osu.Game.Rulesets.Taiko.Objects.Drawables.Pieces;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Containers;
 
 namespace osu.Game.Rulesets.Taiko.Objects.Drawables

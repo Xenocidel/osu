@@ -15,7 +15,6 @@ using osu.Game.Rulesets.Taiko.UI;
 using System;
 using osu.Game.Rulesets.Timing;
 using osu.Game.Rulesets.Taiko.Timing;
-using osu.Game.Rulesets.Taiko.Timing.Drawables;
 
 namespace osu.Desktop.VisualTests.Tests
 {
