@@ -70,7 +70,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                             Size = new Vector2(TaikoHitObject.DEFAULT_CIRCLE_DIAMETER),
                             BlendingMode = BlendingMode.Additive,
                             Masking = true,
-                            Children = new []
+                            Children = new[]
                             {
                                 new Box
                                 {
@@ -121,7 +121,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Children = new []
+                            Children = new[]
                             {
                                 symbol = new SwellSymbolPiece()
                             }

@@ -71,7 +71,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                             RelativeSizeAxes = Axes.Both,
                             BorderThickness = 2,
                             Masking = true,
-                            EdgeEffect = new EdgeEffect
+                            EdgeEffect = new EdgeEffectParameters
                             {
                                 Type = EdgeEffectType.Shadow,
                                 Colour = Color4.Black.Opacity(0.2f),
@@ -271,7 +271,6 @@ namespace osu.Game.Rulesets.Taiko.UI
 
                 if (judgedObject.HitObject.Kiai)
                     kiaiExplosionContainer.Add(new KiaiHitExplosion(judgedObject.Judgement, isRim));
-
             }
             else
                 hitExplosionContainer.Children.FirstOrDefault(e => e.Judgement == judgedObject.Judgement)?.VisualiseSecondHit();

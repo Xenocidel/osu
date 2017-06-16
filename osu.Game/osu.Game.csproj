@@ -39,11 +39,13 @@
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ppy.OpenTK.2.0.50727.1341\lib\net45\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK, Version=3.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)\packages\ppy.OpenTK.3.0\lib\net45\OpenTK.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.15.2.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\SharpCompress.0.15.2\lib\net45\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.17.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>$(SolutionDir)\packages\SharpCompress.0.17.1\lib\net45\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="SQLite.Net, Version=3.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\SQLite.Net.Core-PCL.3.1.1\lib\portable-win8+net45+wp8+wpa81+MonoAndroid1+MonoTouch1\SQLite.Net.dll</HintPath>
@@ -74,8 +76,13 @@
     <Compile Include="Audio\SampleInfoList.cs" />
     <Compile Include="Beatmaps\Drawables\BeatmapBackgroundSprite.cs" />
     <Compile Include="Beatmaps\DifficultyCalculator.cs" />
+    <Compile Include="Graphics\Cursor\OsuContextMenuContainer.cs" />
     <Compile Include="Graphics\UserInterface\IconButton.cs" />
     <Compile Include="Configuration\SelectionRandomType.cs" />
+    <Compile Include="Graphics\UserInterface\MenuItemType.cs" />
+    <Compile Include="Graphics\UserInterface\OsuContextMenu.cs" />
+    <Compile Include="Graphics\UserInterface\OsuContextMenuItem.cs" />
+    <Compile Include="Online\API\Requests\GetUsersRequest.cs" />
     <Compile Include="Online\API\Requests\PostMessageRequest.cs" />
     <Compile Include="Online\Chat\ErrorMessage.cs" />
     <Compile Include="Overlays\Chat\ChatTabControl.cs" />
@@ -88,6 +95,7 @@
     <Compile Include="Overlays\Settings\SettingsHeader.cs" />
     <Compile Include="Overlays\Settings\Sections\Audio\MainMenuSettings.cs" />
     <Compile Include="Overlays\Toolbar\ToolbarChatButton.cs" />
+    <Compile Include="Overlays\Toolbar\ToolbarSocialButton.cs" />
     <Compile Include="Rulesets\Beatmaps\BeatmapConverter.cs" />
     <Compile Include="Rulesets\Beatmaps\BeatmapProcessor.cs" />
     <Compile Include="Beatmaps\ControlPoints\ControlPoint.cs" />
@@ -193,10 +201,10 @@
     <Compile Include="Database\RulesetDatabase.cs" />
     <Compile Include="Rulesets\Scoring\Score.cs" />
     <Compile Include="Rulesets\Scoring\ScoreProcessor.cs" />
-    <Compile Include="Rulesets\Timing\Drawables\DrawableTimingChange.cs" />
-    <Compile Include="Rulesets\Timing\IHasTimeSpan.cs" />
-    <Compile Include="Rulesets\Timing\TimingChange.cs" />
-    <Compile Include="Rulesets\Timing\TimingChangeContainer.cs" />
+    <Compile Include="Rulesets\Timing\SpeedAdjustmentContainer.cs" />
+    <Compile Include="Rulesets\Timing\DrawableTimingSection.cs" />
+    <Compile Include="Rulesets\Timing\MultiplierControlPoint.cs" />
+    <Compile Include="Rulesets\Timing\SpeedAdjustmentCollection.cs" />
     <Compile Include="Screens\Menu\MenuSideFlashes.cs" />
     <Compile Include="Screens\Play\HUD\HealthDisplay.cs" />
     <Compile Include="Screens\Play\HUDOverlay.cs" />
@@ -306,6 +314,7 @@
     <Compile Include="Screens\Select\SongSelect.cs" />
     <Compile Include="Rulesets\UI\HitRenderer.cs" />
     <Compile Include="Rulesets\UI\Playfield.cs" />
+    <Compile Include="Rulesets\UI\SpeedAdjustedHitRenderer.cs" />
     <Compile Include="Screens\Select\EditSongSelect.cs" />
     <Compile Include="Screens\Play\HUD\ComboCounter.cs" />
     <Compile Include="Screens\Play\HUD\ComboResultCounter.cs" />
@@ -457,16 +466,24 @@
     <Compile Include="Overlays\DirectOverlay.cs" />
     <Compile Include="Overlays\Direct\FilterControl.cs" />
     <Compile Include="Overlays\Direct\Header.cs" />
-    <Compile Include="Overlays\Direct\SortTabControl.cs" />
     <Compile Include="Graphics\UserInterface\OsuEnumDropdown.cs" />
     <Compile Include="Overlays\Direct\DirectPanel.cs" />
     <Compile Include="Overlays\Direct\DirectGridPanel.cs" />
     <Compile Include="Overlays\Direct\DirectListPanel.cs" />
     <Compile Include="Database\OnlineWorkingBeatmap.cs" />
     <Compile Include="Database\BeatmapOnlineInfo.cs" />
-    <Compile Include="Overlays\Direct\SlimEnumDropdown.cs" />
     <Compile Include="Graphics\Containers\ReverseDepthFillFlowContainer.cs" />
     <Compile Include="Database\RankStatus.cs" />
+    <Compile Include="Overlays\SearchableList\SearchableListHeader.cs" />
+    <Compile Include="Overlays\SearchableList\HeaderTabControl.cs" />
+    <Compile Include="Overlays\Social\FilterControl.cs" />
+    <Compile Include="Overlays\Social\Header.cs" />
+    <Compile Include="Overlays\SearchableList\SearchableListFilterControl.cs" />
+    <Compile Include="Overlays\SearchableList\SearchableListOverlay.cs" />
+    <Compile Include="Graphics\UserInterface\PageTabControl.cs" />
+    <Compile Include="Overlays\SocialOverlay.cs" />
+    <Compile Include="Overlays\SearchableList\SlimEnumDropdown.cs" />
+    <Compile Include="Overlays\SearchableList\DisplayStyleControl.cs" />
     <Compile Include="Graphics\UserInterface\BreadcrumbControl.cs" />
   </ItemGroup>
   <ItemGroup>
