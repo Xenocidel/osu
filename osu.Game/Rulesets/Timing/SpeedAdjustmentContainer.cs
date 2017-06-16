@@ -31,28 +31,26 @@ namespace osu.Game.Rulesets.Timing
             set { visibleTimeRange.BindTo(value); }
         }
 
-        /// <summary>
-        /// The <see cref="MultiplierControlPoint"/> which provides the speed adjustments for this container.
-        /// </summary>
-        public readonly MultiplierControlPoint ControlPoint;
-
         protected override Container<DrawableHitObject> Content => content;
         private Container<DrawableHitObject> content;
 
-        public readonly Axes ScrollingAxes;
+        /// <summary>
+        /// Axes which the content of this container will scroll through.
+        /// </summary>
+        /// <returns></returns>
+        public Axes ScrollingAxes { get; internal set; }
+
+        public readonly MultiplierControlPoint ControlPoint;
 
         /// <summary>
         /// Creates a new <see cref="SpeedAdjustmentContainer"/>.
         /// </summary>
         /// <param name="controlPoint">The <see cref="MultiplierControlPoint"/> which provides the speed adjustments for this container.</param>
-        /// <param name="scrollingAxes">The axes through which the content of this container should scroll through.</param>
-        protected SpeedAdjustmentContainer(MultiplierControlPoint controlPoint, Axes scrollingAxes)
+        protected SpeedAdjustmentContainer(MultiplierControlPoint controlPoint)
         {
-            ScrollingAxes = scrollingAxes;
+            ControlPoint = controlPoint;
 
             RelativeSizeAxes = Axes.Both;
-
-            ControlPoint = controlPoint;
         }
 
         [BackgroundDependencyLoader]
@@ -60,6 +58,7 @@ namespace osu.Game.Rulesets.Timing
         {
             DrawableTimingSection timingSection = CreateTimingSection();
 
+            timingSection.ScrollingAxes = ScrollingAxes;
             timingSection.VisibleTimeRange.BindTo(VisibleTimeRange);
             timingSection.RelativeChildOffset = new Vector2((ScrollingAxes & Axes.X) > 0 ? (float)ControlPoint.StartTime : 0, (ScrollingAxes & Axes.Y) > 0 ? (float)ControlPoint.StartTime : 0);
 

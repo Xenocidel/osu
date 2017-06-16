@@ -69,7 +69,7 @@ namespace osu.Desktop.VisualTests.Tests
                             RelativeSizeAxes = Axes.Both,
                             Alpha = 0.25f
                         },
-                        adjustmentCollection = new SpeedAdjustmentCollection
+                        adjustmentCollection = new SpeedAdjustmentCollection(Axes.Y)
                         {
                             RelativeSizeAxes = Axes.Both,
                             VisibleTimeRange = timeRangeBindable,
@@ -126,7 +126,7 @@ namespace osu.Desktop.VisualTests.Tests
         private class TestSpeedAdjustmentContainer : SpeedAdjustmentContainer
         {
             public TestSpeedAdjustmentContainer(MultiplierControlPoint controlPoint)
-                : base(controlPoint, Axes.Y)
+                : base(controlPoint)
             {
             }
 
@@ -137,7 +137,6 @@ namespace osu.Desktop.VisualTests.Tests
                 private readonly MultiplierControlPoint controlPoint;
 
                 public TestDrawableTimingSection(MultiplierControlPoint controlPoint)
-                    : base(Axes.Y)
                 {
                     this.controlPoint = controlPoint;
                 }
@@ -196,11 +195,25 @@ namespace osu.Desktop.VisualTests.Tests
                 FadeInFromZero(250, EasingTypes.OutQuint);
             }
 
+            private bool hasExpired;
             protected override void Update()
             {
                 base.Update();
                 if (Time.Current >= HitObject.StartTime)
+                {
                     background.Colour = Color4.Red;
+
+                    if (!hasExpired)
+                    {
+                        using (BeginDelayedSequence(200))
+                        {
+                            FadeOut(200);
+                            Expire();
+                        }
+
+                        hasExpired = true;
+                    }
+                }
             }
         }
     }
