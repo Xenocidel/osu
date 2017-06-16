@@ -142,7 +142,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addBarLine(bool major, double delay = scroll_time)
         {
-            playfield.Add(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
+            playfield.AddBarLineSpeedAdjustment(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
 
             BarLine bl = new BarLine { StartTime = playfield.Time.Current + delay };
 
@@ -151,7 +151,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addSwell(double duration = default_duration)
         {
-            playfield.Add(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
+            playfield.AddHitObjectSpeedAdjustment(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
 
             playfield.Add(new DrawableSwell(new Swell
             {
@@ -165,7 +165,7 @@ namespace osu.Desktop.VisualTests.Tests
             addBarLine(true);
             addBarLine(true, scroll_time + duration);
 
-            playfield.Add(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
+            playfield.AddHitObjectSpeedAdjustment(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
 
             var d = new DrumRoll
             {
@@ -179,7 +179,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addCentreHit(bool strong)
         {
-            playfield.Add(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
+            playfield.AddHitObjectSpeedAdjustment(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
 
             Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
@@ -191,7 +191,7 @@ namespace osu.Desktop.VisualTests.Tests
 
         private void addRimHit(bool strong)
         {
-            playfield.Add(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
+            playfield.AddHitObjectSpeedAdjustment(new TaikoSpeedAdjustmentContainer(new MultiplierControlPoint(), ScrollingAlgorithm.Basic));
 
             Hit h = new Hit { StartTime = playfield.Time.Current + scroll_time };
 
