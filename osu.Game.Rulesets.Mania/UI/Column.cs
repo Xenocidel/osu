@@ -42,7 +42,8 @@ namespace osu.Game.Rulesets.Mania.UI
         /// </summary>
         public Bindable<Key> Key = new Bindable<Key>();
 
-        private readonly Box background;
+        private readonly Container backgroundContainer;
+        private readonly Box backgroundPressIndicator;
         private readonly Container hitTargetBar;
         private readonly Container keyIcon;
 
@@ -55,11 +56,27 @@ namespace osu.Game.Rulesets.Mania.UI
 
             Children = new Drawable[]
             {
-                background = new Box
+                backgroundContainer = new Container
                 {
-                    Name = "Foreground",
+                    Name = "Background elements",
                     RelativeSizeAxes = Axes.Both,
-                    Alpha = 0.2f
+                    Children = new[]
+                    {
+                        new Box
+                        {
+                            Name = "Background",
+                            RelativeSizeAxes = Axes.Both,
+                            Alpha = 0.2f
+                        },
+                        backgroundPressIndicator = new Box
+                        {
+                            Name = "Background (pressed)",
+                            RelativeSizeAxes = Axes.Both,
+                            Height = 0.35f,
+                            Alpha = 0,
+                            ColourInfo = ColourInfo.GradientVertical(Color4.White, Color4.Black.Opacity(0))
+                        }
+                    }
                 },
                 new Container
                 {
@@ -122,7 +139,7 @@ namespace osu.Game.Rulesets.Mania.UI
                         {
                             Name = "Key gradient",
                             RelativeSizeAxes = Axes.Both,
-                            ColourInfo = ColourInfo.GradientVertical(Color4.Black, Color4.Black.Opacity(0)),
+                            ColourInfo = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black),
                             Alpha = 0.5f
                         },
                         keyIcon = new Container
@@ -174,7 +191,7 @@ namespace osu.Game.Rulesets.Mania.UI
                     return;
                 accentColour = value;
 
-                background.Colour = accentColour;
+                backgroundContainer.Colour = accentColour;
 
                 hitTargetBar.EdgeEffect = new EdgeEffectParameters
                 {
@@ -206,7 +223,7 @@ namespace osu.Game.Rulesets.Mania.UI
 
             if (args.Key == Key)
             {
-                background.FadeTo(background.Alpha + 0.2f, 50, EasingTypes.OutQuint);
+                backgroundPressIndicator.FadeTo(0.6f, 250, EasingTypes.OutQuint);
                 keyIcon.ScaleTo(1.4f, 50, EasingTypes.OutQuint);
             }
 
@@ -217,7 +234,7 @@ namespace osu.Game.Rulesets.Mania.UI
         {
             if (args.Key == Key)
             {
-                background.FadeTo(0.2f, 800, EasingTypes.OutQuart);
+                backgroundPressIndicator.FadeTo(0, 200, EasingTypes.OutQuint);
                 keyIcon.ScaleTo(1f, 400, EasingTypes.OutQuart);
             }
 
