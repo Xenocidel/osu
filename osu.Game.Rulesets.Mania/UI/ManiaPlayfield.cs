@@ -255,6 +255,9 @@ namespace osu.Game.Rulesets.Mania.UI
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre
             });
+
+            if (judgedObject.Judgement.Result == HitResult.Hit)
+                Columns.ElementAt(judgedObject.HitObject.Column).AddHitExplosion(judgedObject.Judgement);
         }
 
         protected override bool OnKeyDown(InputState state, KeyDownEventArgs args)

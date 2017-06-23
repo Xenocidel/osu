@@ -15,6 +15,8 @@ using osu.Game.Rulesets.Objects.Drawables;
 using System;
 using osu.Framework.Configuration;
 using osu.Game.Rulesets.Timing;
+using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Mania.Judgements;
 
 namespace osu.Game.Rulesets.Mania.UI
 {
@@ -214,6 +216,11 @@ namespace osu.Game.Rulesets.Mania.UI
         {
             hitObject.AccentColour = AccentColour;
             speedAdjustments.Add(hitObject);
+        }
+
+        public void AddHitExplosion(ManiaJudgement judgement)
+        {
+
         }
 
         private bool onKeyDown(InputState state, KeyDownEventArgs args)
