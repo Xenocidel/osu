@@ -98,7 +98,7 @@ namespace osu.Game.Rulesets.Objects.Drawables
         /// <summary>
         /// Whether this hit object and all of its nested hit objects have been judged.
         /// </summary>
-        public bool Judged => (Judgement?.Result ?? HitResult.None) != HitResult.None && (NestedHitObjects?.All(h => h.Judged) ?? true);
+        public bool Judged => (Judgement?.Result ?? HitResult.Hit) != HitResult.None && (NestedHitObjects?.All(h => h.Judged) ?? true);
 
         /// <summary>
         /// Process a hit of this hitobject. Carries out judgement.
@@ -106,6 +106,9 @@ namespace osu.Game.Rulesets.Objects.Drawables
         /// <returns>Whether a hit was processed.</returns>
         protected bool UpdateJudgement(bool userTriggered)
         {
+            if (Judgement == null)
+                return false;
+
             var partial = Judgement as IPartialJudgement;
 
             // Never re-process non-partial hits
