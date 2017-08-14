@@ -11,114 +11,32 @@ using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.IO.Serialization;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Timing;
 
 namespace osu.Game.Rulesets.UI
 {
     /// <summary>
-    /// A type of <see cref="RulesetContainer{TPlayfield,TObject,TJudgement}"/> that supports a <see cref="ScrollingPlayfield{TObject, TJudgement}"/>.
-    /// <see cref="HitObject"/>s inside this <see cref="RulesetContainer{TPlayfield,TObject,TJudgement}"/> will scroll within the playfield.
+    /// A type of <see cref="RulesetContainer{TPlayfield,TObject,TJudgement}"/> which contains scrolling hit objects.
     /// </summary>
     public abstract class ScrollingRulesetContainer<TPlayfield, TObject, TJudgement> : RulesetContainer<TPlayfield, TObject, TJudgement>
         where TObject : HitObject
         where TJudgement : Judgement
         where TPlayfield : ScrollingPlayfield<TObject, TJudgement>
     {
-        /// <summary>
-        /// Provides the default <see cref="MultiplierControlPoint"/>s that adjust the scrolling rate of <see cref="HitObject"/>s
-        /// inside this <see cref="RulesetContainer{TPlayfield,TObject,TJudgement}"/>.
-        /// </summary>
-        /// <returns></returns>
-        protected readonly SortedList<MultiplierControlPoint> DefaultControlPoints = new SortedList<MultiplierControlPoint>(Comparer<MultiplierControlPoint>.Default);
-
         protected ScrollingRulesetContainer(Ruleset ruleset, WorkingBeatmap beatmap, bool isForCurrentRuleset)
             : base(ruleset, beatmap, isForCurrentRuleset)
         {
         }
 
-        [BackgroundDependencyLoader]
-        private void load()
-        {
-            DefaultControlPoints.ForEach(c => applySpeedAdjustment(c, Playfield));
-        }
-
-        private void applySpeedAdjustment(MultiplierControlPoint controlPoint, ScrollingPlayfield<TObject, TJudgement> playfield)
-        {
-            playfield.HitObjects.AddSpeedAdjustment(CreateSpeedAdjustmentContainer(controlPoint));
-            playfield.NestedPlayfields.ForEach(p => applySpeedAdjustment(controlPoint, p));
-        }
-
-        protected override void ApplyBeatmap()
-        {
-            // Calculate default multiplier control points
-            var lastTimingPoint = new TimingControlPoint();
-            var lastDifficultyPoint = new DifficultyControlPoint();
-
-            // Merge timing + difficulty points
-            var allPoints = new SortedList<ControlPoint>(Comparer<ControlPoint>.Default);
-            allPoints.AddRange(Beatmap.ControlPointInfo.TimingPoints);
-            allPoints.AddRange(Beatmap.ControlPointInfo.DifficultyPoints);
-
-            // Generate the timing points, making non-timing changes use the previous timing change
-            var timingChanges = allPoints.Select(c =>
-            {
-                var timingPoint = c as TimingControlPoint;
-                var difficultyPoint = c as DifficultyControlPoint;
-
-                if (timingPoint != null)
-                    lastTimingPoint = timingPoint;
-
-                if (difficultyPoint != null)
-                    lastDifficultyPoint = difficultyPoint;
-
-                return new MultiplierControlPoint(c.Time)
-                {
-                    TimingPoint = lastTimingPoint,
-                    DifficultyPoint = lastDifficultyPoint
-                };
-            });
-
-            double lastObjectTime = (Objects.LastOrDefault() as IHasEndTime)?.EndTime ?? Objects.LastOrDefault()?.StartTime ?? double.MaxValue;
-
-            // Perform some post processing of the timing changes
-            timingChanges = timingChanges
-                // Collapse sections after the last hit object
-                .Where(s => s.StartTime <= lastObjectTime)
-                // Collapse sections with the same start time
-                .GroupBy(s => s.StartTime).Select(g => g.Last()).OrderBy(s => s.StartTime)
-                // Collapse sections with the same beat length
-                .GroupBy(s => s.TimingPoint.BeatLength * s.DifficultyPoint.SpeedMultiplier).Select(g => g.First());
-
-            DefaultControlPoints.AddRange(timingChanges);
-
-            // If we have no control points, add a default one
-            if (DefaultControlPoints.Count == 0)
-                DefaultControlPoints.Add(new MultiplierControlPoint());
-        }
+        protected override void Add(DrawableHitObject<TObject, TJudgement> hitObject) => base.Add(CreateScrollingWrapper(hitObject));
 
         /// <summary>
-        /// Generates a <see cref="MultiplierControlPoint"/> with the default timing change/difficulty change from the beatmap at a time.
+        /// Creates a container which wraps a <see cref="DrawableHitObject<TObject, Tjudgement>"/> to handle scrolling the hit object.
         /// </summary>
-        /// <param name="time">The time to create the control point at.</param>
-        /// <returns>The default <see cref="MultiplierControlPoint"/> at <paramref name="time"/>.</returns>
-        public MultiplierControlPoint CreateControlPointAt(double time)
-        {
-            if (DefaultControlPoints.Count == 0)
-                return new MultiplierControlPoint(time);
-
-            int index = DefaultControlPoints.BinarySearch(new MultiplierControlPoint(time));
-            if (index < 0)
-                return new MultiplierControlPoint(time);
-
-            return new MultiplierControlPoint(time, DefaultControlPoints[index].DeepClone());
-        }
-
-        /// <summary>
-        /// Creates a <see cref="SpeedAdjustmentContainer"/> that facilitates the movement of hit objects.
-        /// </summary>
-        /// <param name="controlPoint">The <see cref="MultiplierControlPoint"/> that provides the speed adjustments for the hitobjects.</param>
-        /// <returns>The <see cref="SpeedAdjustmentContainer"/>.</returns>
-        protected virtual SpeedAdjustmentContainer CreateSpeedAdjustmentContainer(MultiplierControlPoint controlPoint) => new SpeedAdjustmentContainer(controlPoint);
+        /// <param name="hitObject">The <see cref="DrawableHitObject<TObject, TJudgement>"/> to create the wrapper for.</param>
+        /// <returns>The <see cref="DrawableScrollingHitObject<TObject, TJudgement>"/> wrapper.</returns>
+        protected abstract DrawableScrollingHitObject<TObject, TJudgement> CreateScrollingWrapper(DrawableHitObject<TObject, TJudgement> hitObject);
     }
 }

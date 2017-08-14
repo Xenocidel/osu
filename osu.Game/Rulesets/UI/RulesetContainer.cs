@@ -280,14 +280,10 @@ namespace osu.Game.Rulesets.UI
             foreach (TObject h in Beatmap.HitObjects)
             {
                 var drawableObject = GetVisualRepresentation(h);
-
                 if (drawableObject == null)
                     continue;
 
-                drawableObject.OnJudgement += onJudgement;
-
-                drawableObjects.Add(drawableObject);
-                Playfield.Add(drawableObject);
+                Add(drawableObject);
             }
 
             Playfield.PostProcess();
@@ -325,6 +321,18 @@ namespace osu.Game.Rulesets.UI
         /// <param name="h">The HitObject to make drawable.</param>
         /// <returns>The DrawableHitObject.</returns>
         protected abstract DrawableHitObject<TObject, TJudgement> GetVisualRepresentation(TObject h);
+
+        /// <summary>
+        /// Adds a <see cref="DrawableHitObject<TObject, TJudgement>"/> to this <see cref="RulesetContainer"/> and to the contained <see cref="Playfield<TObject, TJudgement>"/>.
+        /// </summary>
+        /// <param name="hitObject">The <see cref="DrawableHitObject<TObject, TJudgement>"/> to add.</param>
+        protected virtual void Add(DrawableHitObject<TObject, TJudgement> hitObject)
+        {
+            hitObject.OnJudgement += onJudgement;
+
+            drawableObjects.Add(hitObject);
+            Playfield.Add(hitObject);
+        }
 
         /// <summary>
         /// Creates a Playfield.

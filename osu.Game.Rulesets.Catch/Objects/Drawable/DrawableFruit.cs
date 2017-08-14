@@ -16,7 +16,7 @@ using OpenTK.Graphics;
 
 namespace osu.Game.Rulesets.Catch.Objects.Drawable
 {
-    public class DrawableFruit : DrawableScrollingHitObject<CatchBaseHit, CatchJudgement>
+    public class DrawableFruit : DrawableHitObject<CatchBaseHit, CatchJudgement>
     {
         private const float pulp_size = 30;
 
