@@ -53,7 +53,7 @@ namespace osu.Game.Rulesets.Taiko.Objects
             DifficultyControlPoint difficultyPoint = controlPointInfo.DifficultyPointAt(StartTime);
             EffectControlPoint effectPoint = controlPointInfo.EffectPointAt(StartTime);
 
-            ScrollTime = scroll_time * (timingPoint.BeatLength * difficultyPoint.SpeedMultiplier / 1000) / difficulty.SliderMultiplier;
+            ScrollTime = scroll_time * (timingPoint.BeatLength / difficultyPoint.SpeedMultiplier / 1000) / difficulty.SliderMultiplier;
 
             Kiai |= effectPoint.KiaiMode;
         }
