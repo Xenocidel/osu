@@ -10,9 +10,7 @@ using osu.Framework.Input;
 using osu.Framework.Timing;
 using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Mania.Objects.Drawables;
-using osu.Game.Rulesets.Mania.Timing;
 using osu.Game.Rulesets.Mania.UI;
-using osu.Game.Rulesets.Timing;
 using OpenTK;
 using OpenTK.Input;
 
@@ -41,11 +39,6 @@ namespace osu.Desktop.Tests.Visual
             const double start_time = 500;
             const double duration = 500;
 
-            Func<double, bool, SpeedAdjustmentContainer> createTimingChange = (time, gravity) => new ManiaSpeedAdjustmentContainer(new MultiplierControlPoint(time)
-            {
-                TimingPoint = { BeatLength = 1000 }
-            }, gravity ? ScrollingAlgorithm.Gravity : ScrollingAlgorithm.Basic);
-
             Action<bool> createPlayfieldWithNotes = gravity =>
             {
                 Clear();
@@ -61,22 +54,13 @@ namespace osu.Desktop.Tests.Visual
                     Clock = new FramedClock(rateAdjustClock)
                 });
 
-                if (!gravity)
-                    playField.Columns.ForEach(c => c.Add(createTimingChange(0, false)));
-
                 for (double t = start_time; t <= start_time + duration; t += 100)
                 {
-                    if (gravity)
-                        playField.Columns.ElementAt(0).Add(createTimingChange(t, true));
-
                     playField.Add(new DrawableNote(new Note
                     {
                         StartTime = t,
                         Column = 0
                     }, new Bindable<Key>(Key.D)));
-
-                    if (gravity)
-                        playField.Columns.ElementAt(3).Add(createTimingChange(t, true));
 
                     playField.Add(new DrawableNote(new Note
                     {
@@ -85,18 +69,12 @@ namespace osu.Desktop.Tests.Visual
                     }, new Bindable<Key>(Key.K)));
                 }
 
-                if (gravity)
-                    playField.Columns.ElementAt(1).Add(createTimingChange(start_time, true));
-
                 playField.Add(new DrawableHoldNote(new HoldNote
                 {
                     StartTime = start_time,
                     Duration = duration,
                     Column = 1
                 }, new Bindable<Key>(Key.F)));
-
-                if (gravity)
-                    playField.Columns.ElementAt(2).Add(createTimingChange(start_time, true));
 
                 playField.Add(new DrawableHoldNote(new HoldNote
                 {

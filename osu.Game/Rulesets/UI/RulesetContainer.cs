@@ -306,7 +306,7 @@ namespace osu.Game.Rulesets.UI
         /// Triggered when an object's Judgement is updated.
         /// </summary>
         /// <param name="judgedObject">The object that Judgement has been updated for.</param>
-        private void onJudgement(DrawableHitObject<TObject, TJudgement> judgedObject)
+        protected void TriggerOnJudgement(DrawableHitObject<TObject, TJudgement> judgedObject)
         {
             Playfield.OnJudgement(judgedObject);
 
@@ -328,7 +328,7 @@ namespace osu.Game.Rulesets.UI
         /// <param name="hitObject">The <see cref="DrawableHitObject<TObject, TJudgement>"/> to add.</param>
         protected virtual void Add(DrawableHitObject<TObject, TJudgement> hitObject)
         {
-            hitObject.OnJudgement += onJudgement;
+            hitObject.OnJudgement += TriggerOnJudgement;
 
             drawableObjects.Add(hitObject);
             Playfield.Add(hitObject);

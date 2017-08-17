@@ -219,7 +219,6 @@
     <Compile Include="Rulesets\Objects\SliderCurve.cs" />
     <Compile Include="Rulesets\Objects\Types\CurveType.cs" />
     <Compile Include="Rulesets\Objects\Drawables\IDrawableHitObjectWithProxiedApproach.cs" />
-    <Compile Include="Rulesets\Objects\Drawables\IScrollingHitObject.cs" />
     <Compile Include="Rulesets\Judgements\Judgement.cs" />
     <Compile Include="Rulesets\Objects\HitObjectParser.cs" />
     <Compile Include="Rulesets\Objects\Types\IHasCombo.cs" />
@@ -235,10 +234,6 @@
     <Compile Include="Rulesets\RulesetStore.cs" />
     <Compile Include="Rulesets\Scoring\Score.cs" />
     <Compile Include="Rulesets\Scoring\ScoreProcessor.cs" />
-    <Compile Include="Rulesets\Timing\SpeedAdjustmentContainer.cs" />
-    <Compile Include="Rulesets\Timing\LinearScrollingContainer.cs" />
-    <Compile Include="Rulesets\Timing\ScrollingContainer.cs" />
-    <Compile Include="Rulesets\Timing\MultiplierControlPoint.cs" />
     <Compile Include="Screens\Menu\MenuSideFlashes.cs" />
     <Compile Include="Screens\Play\HUD\HealthDisplay.cs" />
     <Compile Include="Screens\Play\HUDOverlay.cs" />
@@ -256,7 +251,7 @@
     <Compile Include="Beatmaps\Drawables\DifficultyColouredContainer.cs" />
     <Compile Include="Beatmaps\Drawables\Panel.cs" />
     <Compile Include="Rulesets\Objects\Drawables\DrawableHitObject.cs" />
-    <Compile Include="Rulesets\Objects\Drawables\DrawableScrollingHitObject.cs" />
+    <Compile Include="Rulesets\Objects\Drawables\ScrollingWrapper.cs" />
     <Compile Include="Rulesets\Objects\HitObject.cs" />
     <Compile Include="Configuration\OsuConfigManager.cs" />
     <Compile Include="Overlays\Notifications\IHasCompletionTarget.cs" />
@@ -461,6 +456,7 @@
     <Compile Include="Rulesets\Mods\Mod.cs" />
     <Compile Include="Overlays\Mods\ModButtonEmpty.cs" />
     <Compile Include="Overlays\Mods\ModButton.cs" />
+    <Compile Include="Rulesets\UI\LinearScrollingWrapper.cs" />
     <Compile Include="Rulesets\UI\ModIcon.cs" />
     <Compile Include="Overlays\Mods\ModSection.cs" />
     <Compile Include="Overlays\Mods\DifficultyReductionSection.cs" />

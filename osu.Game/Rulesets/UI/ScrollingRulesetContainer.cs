@@ -1,6 +1,7 @@
 // Copyright (c) 2007-2017 ppy Pty Ltd <contact@ppy.sh>.
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -13,7 +14,6 @@ using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
-using osu.Game.Rulesets.Timing;
 
 namespace osu.Game.Rulesets.UI
 {
@@ -29,14 +29,5 @@ namespace osu.Game.Rulesets.UI
             : base(ruleset, beatmap, isForCurrentRuleset)
         {
         }
-
-        protected override void Add(DrawableHitObject<TObject, TJudgement> hitObject) => base.Add(CreateScrollingWrapper(hitObject));
-
-        /// <summary>
-        /// Creates a container which wraps a <see cref="DrawableHitObject<TObject, Tjudgement>"/> to handle scrolling the hit object.
-        /// </summary>
-        /// <param name="hitObject">The <see cref="DrawableHitObject<TObject, TJudgement>"/> to create the wrapper for.</param>
-        /// <returns>The <see cref="DrawableScrollingHitObject<TObject, TJudgement>"/> wrapper.</returns>
-        protected abstract DrawableScrollingHitObject<TObject, TJudgement> CreateScrollingWrapper(DrawableHitObject<TObject, TJudgement> hitObject);
     }
 }

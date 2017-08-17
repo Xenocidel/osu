@@ -37,10 +37,5 @@ namespace osu.Game.Rulesets.Catch.UI
 
             return null;
         }
-
-        protected override DrawableScrollingHitObject<CatchBaseHit, CatchJudgement> CreateScrollingWrapper(DrawableHitObject<CatchBaseHit, CatchJudgement> hitObject)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

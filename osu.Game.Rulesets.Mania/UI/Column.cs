@@ -45,7 +45,6 @@ namespace osu.Game.Rulesets.Mania.UI
         private readonly Container<Drawable> content;
 
         public Column()
-            : base(Axes.Y)
         {
             Width = column_width;
 
@@ -223,6 +222,9 @@ namespace osu.Game.Rulesets.Mania.UI
 
             return false;
         }
+
+        protected override ScrollingWrapper<ManiaHitObject, ManiaJudgement> CreateScrollingWrapper(DrawableHitObject<ManiaHitObject, ManiaJudgement> hitObject)
+            => new LinearScrollingWrapper<ManiaHitObject, ManiaJudgement>(hitObject, ScrollDirection.Down);
 
         /// <summary>
         /// This is a simple container which delegates various input events that have to be captured before the notes.

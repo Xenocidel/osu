@@ -14,14 +14,13 @@ using osu.Framework.MathUtils;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
-using osu.Game.Rulesets.Timing;
 
 namespace osu.Game.Rulesets.UI
 {
     /// <summary>
     /// A type of <see cref="Playfield{TObject, TJudgement}"/> specialized towards scrolling <see cref="DrawableHitObject"/>s.
     /// </summary>
-    public class ScrollingPlayfield<TObject, TJudgement> : Playfield<TObject, TJudgement>
+    public abstract class ScrollingPlayfield<TObject, TJudgement> : Playfield<TObject, TJudgement>
         where TObject : HitObject
         where TJudgement : Judgement
     {
@@ -53,23 +52,15 @@ namespace osu.Game.Rulesets.UI
             set { scrollTime = MathHelper.Clamp(value, min_scroll_time, max_scroll_time); }
         }
 
-        private List<ScrollingPlayfield<TObject, TJudgement>> nestedPlayfields;
-        /// <summary>
-        /// All the <see cref="ScrollingPlayfield{TObject, TJudgement}"/>s nested inside this playfield.
-        /// </summary>
-        public IEnumerable<ScrollingPlayfield<TObject, TJudgement>> NestedPlayfields => nestedPlayfields;
+        public override void Add(DrawableHitObject<TObject, TJudgement> h) => base.Add(CreateScrollingWrapper(h));
 
-        /// <summary>
-        /// Adds a <see cref="ScrollingPlayfield{TObject, TJudgement}"/> to this playfield. The nested <see cref="ScrollingPlayfield{TObject, TJudgement}"/>
-        /// will be given all of the same speed adjustments as this playfield.
-        /// </summary>
-        /// <param name="otherPlayfield">The <see cref="ScrollingPlayfield{TObject, TJudgement}"/> to add.</param>
-        protected void AddNested(ScrollingPlayfield<TObject, TJudgement> otherPlayfield)
+        public override void Remove(DrawableHitObject<TObject, TJudgement> h)
         {
-            if (nestedPlayfields == null)
-                nestedPlayfields = new List<ScrollingPlayfield<TObject, TJudgement>>();
+            var wrapper = HitObjects.Objects.First(w => w.Contains(h));
+            var p = (DrawableHitObject)h.Parent;
 
-            nestedPlayfields.Add(otherPlayfield);
+            HitObjects.Remove(wrapper);
+            p.Remove(h);
         }
 
         protected override bool OnKeyDown(InputState state, KeyDownEventArgs args)
@@ -92,5 +83,12 @@ namespace osu.Game.Rulesets.UI
 
         private void transformScrollTimeTo(double newScrollTime, double duration = 0, Easing easing = Easing.None)
             => this.TransformTo(nameof(ScrollTime), newScrollTime, duration, easing);
+
+        /// <summary>
+        /// Creates a container which wraps a <see cref="DrawableHitObject<TObject, Tjudgement>"/> to handle scrolling the hit object.
+        /// </summary>
+        /// <param name="hitObject">The <see cref="DrawableHitObject<TObject, TJudgement>"/> to create the wrapper for.</param>
+        /// <returns>The <see cref="ScrollingWrapper<TObject, TJudgement>"/> wrapper.</returns>
+        protected abstract ScrollingWrapper<TObject, TJudgement> CreateScrollingWrapper(DrawableHitObject<TObject, TJudgement> hitObject);
     }
 }

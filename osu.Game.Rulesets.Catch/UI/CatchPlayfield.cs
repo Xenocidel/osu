@@ -19,10 +19,7 @@ namespace osu.Game.Rulesets.Catch.UI
         private readonly CatcherArea catcherArea;
 
         public CatchPlayfield()
-            : base(Axes.Y)
         {
-            Reversed.Value = true;
-
             Size = new Vector2(1);
 
             Anchor = Anchor.TopCentre;
@@ -62,5 +59,8 @@ namespace osu.Game.Rulesets.Catch.UI
                 catcherArea.Add(obj, screenPosition);
             }
         }
+
+        protected override ScrollingWrapper<CatchBaseHit, CatchJudgement> CreateScrollingWrapper(DrawableHitObject<CatchBaseHit, CatchJudgement> hitObject)
+            => new LinearScrollingWrapper<CatchBaseHit, CatchJudgement>(hitObject, ScrollDirection.Down);
     }
 }

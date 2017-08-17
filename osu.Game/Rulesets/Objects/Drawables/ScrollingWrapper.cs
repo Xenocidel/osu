@@ -5,6 +5,7 @@ using System;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Rulesets.Judgements;
@@ -16,23 +17,23 @@ namespace osu.Game.Rulesets.Objects.Drawables
     /// A <see cref="DrawableHitObject"/> that wraps a <see cref="DrawableHitObject<TObject, TJudgement>"/>
     /// and provides the capability to scroll through the screen.
     /// </summary>
-    public abstract class DrawableScrollingHitObject<TObject, TJudgement> : DrawableHitObject<TObject, TJudgement>
+    public abstract class ScrollingWrapper<TObject, TJudgement> : DrawableHitObject<TObject, TJudgement>
         where TObject : HitObject
         where TJudgement : Judgement
     {
         public readonly BindableDouble ScrollTime = new BindableDouble(6000);
+
+        public new readonly DrawableHitObject<TObject, TJudgement> HitObject;
 
         private BeatmapDifficulty difficulty;
         private ControlPointInfo controlPoints;
 
         private double baseVelocity;
 
-        private readonly DrawableHitObject<TObject, TJudgement> baseHitObject;
-
-        protected DrawableScrollingHitObject(DrawableHitObject<TObject, TJudgement> hitObject)
+        public ScrollingWrapper(DrawableHitObject<TObject, TJudgement> hitObject)
             : base(hitObject.HitObject)
         {
-            baseHitObject = hitObject;
+            HitObject = hitObject;
 
             base.AutoSizeAxes = Axes.Both;
 
@@ -46,8 +47,8 @@ namespace osu.Game.Rulesets.Objects.Drawables
             difficulty = game.Beatmap.Value.BeatmapInfo.Difficulty;
             controlPoints = game.Beatmap.Value.Beatmap.ControlPointInfo;
 
-            var timingPoint = controlPoints.TimingPointAt(HitObject.StartTime);
-            var difficultyPoint = controlPoints.DifficultyPointAt(HitObject.StartTime);
+            var timingPoint = controlPoints.TimingPointAt(HitObject.HitObject.StartTime);
+            var difficultyPoint = controlPoints.DifficultyPointAt(HitObject.HitObject.StartTime);
 
             // Todo: I changed these calculations a bit, check this!!
             baseVelocity = 1000 / timingPoint.BeatLength * difficultyPoint.SpeedMultiplier * difficulty.SliderMultiplier;
@@ -57,25 +58,25 @@ namespace osu.Game.Rulesets.Objects.Drawables
         {
             base.Update();
 
-            UpdateScroll((float)((HitObject.StartTime - Time.Current) / ScrollTime.Value * baseVelocity));
+            UpdateScroll((float)((Time.Current - HitObject.HitObject.StartTime) / ScrollTime.Value * baseVelocity));
         }
 
-        protected virtual void UpdateScroll(float completion) { }
+        protected abstract void UpdateScroll(float completion);
+
+        protected sealed override TJudgement CreateJudgement() => null;
+
+        protected sealed override void UpdateState(ArmedState state) { }
 
         public new Axes AutoSizeAxes
         {
             get { return Axes.Both; }
-            set { throw new InvalidOperationException($"{nameof(DrawableScrollingHitObject<TObject, TJudgement>)} must always be auto-sized."); }
+            set { throw new InvalidOperationException($"{nameof(ScrollingWrapper<TObject, TJudgement>)} must always be auto-sized."); }
         }
 
         public new Axes RelativeSizeAxes
         {
             get { return Axes.None; }
-            set { throw new InvalidOperationException($"{nameof(DrawableScrollingHitObject<TObject, TJudgement>)} must always be auto-sized."); }
+            set { throw new InvalidOperationException($"{nameof(ScrollingWrapper<TObject, TJudgement>)} must always be auto-sized."); }
         }
-
-        protected sealed override TJudgement CreateJudgement() => null;
-
-        protected sealed override void UpdateState(ArmedState state) { }
     }
 }

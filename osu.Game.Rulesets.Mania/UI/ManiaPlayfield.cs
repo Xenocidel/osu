@@ -57,7 +57,6 @@ namespace osu.Game.Rulesets.Mania.UI
         private readonly int columnCount;
 
         public ManiaPlayfield(int columnCount)
-            : base(Axes.Y)
         {
             this.columnCount = columnCount;
 
@@ -123,13 +122,7 @@ namespace osu.Game.Rulesets.Mania.UI
             };
 
             for (int i = 0; i < columnCount; i++)
-            {
-                var c = new Column();
-                c.VisibleTimeRange.BindTo(VisibleTimeRange);
-
-                columns.Add(c);
-                AddNested(c);
-            }
+                columns.Add(new Column());
         }
 
         [BackgroundDependencyLoader]
@@ -211,5 +204,8 @@ namespace osu.Game.Rulesets.Mania.UI
             // While masking on effectively only the Y-axis, so we need to set the width of the bar line container manually
             content.Width = columns.Width;
         }
+
+        protected override ScrollingWrapper<ManiaHitObject, ManiaJudgement> CreateScrollingWrapper(DrawableHitObject<ManiaHitObject, ManiaJudgement> hitObject)
+            => new LinearScrollingWrapper<ManiaHitObject, ManiaJudgement>(hitObject, ScrollDirection.Down);
     }
 }

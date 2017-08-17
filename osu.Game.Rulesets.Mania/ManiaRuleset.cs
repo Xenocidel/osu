@@ -96,8 +96,7 @@ namespace osu.Game.Rulesets.Mania
                                 new ModAutoplay(),
                                 new ModCinema(),
                             },
-                        },
-                        new ManiaModGravity()
+                        }
                     };
 
                 default:
