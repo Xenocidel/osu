@@ -3,6 +3,7 @@
 
 using OpenTK;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Rulesets.Judgements;
@@ -21,29 +22,26 @@ namespace osu.Game.Rulesets.UI
             : base(hitObject)
         {
             this.scrollDirection = scrollDirection;
+            RelativePositionAxes |= Axes.Both;
         }
 
         protected override void UpdateScroll(float completion)
         {
-            Vector2 direction = HitObject.Position;
             switch (scrollDirection)
             {
                 case ScrollDirection.Up:
-                    direction.Y = -1;
+                    Position = new Vector2(HitObject.Position.X, -completion);
                     break;
                 case ScrollDirection.Down:
-                    direction.Y = 1;
+                    Position = new Vector2(HitObject.Position.X, completion);
                     break;
                 case ScrollDirection.Left:
-                    direction.X = -1;
+                    Position = new Vector2(-completion, HitObject.Position.Y);
                     break;
                 case ScrollDirection.Right:
-                    direction.Y = 1;
+                    Position = new Vector2(completion, HitObject.Position.Y);
                     break;
             }
-
-            direction *= completion;
-            Position = direction * completion;
         }
     }
 

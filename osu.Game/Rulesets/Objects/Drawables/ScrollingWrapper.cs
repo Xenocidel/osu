@@ -36,6 +36,8 @@ namespace osu.Game.Rulesets.Objects.Drawables
             HitObject = hitObject;
 
             base.AutoSizeAxes = Axes.Both;
+            Anchor = hitObject.Anchor;
+            Origin = hitObject.Origin;
 
             Add(hitObject);
             AddNested(hitObject);
@@ -66,17 +68,5 @@ namespace osu.Game.Rulesets.Objects.Drawables
         protected sealed override TJudgement CreateJudgement() => null;
 
         protected sealed override void UpdateState(ArmedState state) { }
-
-        public new Axes AutoSizeAxes
-        {
-            get { return Axes.Both; }
-            set { throw new InvalidOperationException($"{nameof(ScrollingWrapper<TObject, TJudgement>)} must always be auto-sized."); }
-        }
-
-        public new Axes RelativeSizeAxes
-        {
-            get { return Axes.None; }
-            set { throw new InvalidOperationException($"{nameof(ScrollingWrapper<TObject, TJudgement>)} must always be auto-sized."); }
-        }
     }
 }
