@@ -141,7 +141,7 @@ namespace osu.Game.Screens.Menu
                                                             Anchor = Anchor.Centre,
                                                             Origin = Anchor.Centre,
                                                             RelativeSizeAxes = Axes.Both,
-                                                            Scale = new Vector2(0.88f),
+                                                            Scale = new Vector2(0.6f),
                                                             Masking = true,
                                                             Children = new Drawable[]
                                                             {
@@ -217,8 +217,8 @@ namespace osu.Game.Screens.Menu
         {
             sampleClick = audio.Sample.Get(@"Menu/menuhit");
             sampleBeat = audio.Sample.Get(@"Menu/heartbeat");
-            logo.Texture = textures.Get(@"Menu/logo");
-            ripple.Texture = textures.Get(@"Menu/logo");
+            logo.Texture = textures.Get(@"Menu/osuuci");
+            ripple.Texture = textures.Get(@"Menu/osuuci");
         }
 
         private int lastBeatIndex;

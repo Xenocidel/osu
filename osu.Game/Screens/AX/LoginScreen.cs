@@ -32,15 +32,15 @@ namespace osu.Game.Screens.AX
                 },
                 new OsuLogo
                 {
-                    Scale = new Vector2(0.35f),
+                    Scale = new Vector2(0.60f),
                     Interactive = false,
-                    Y = -120
+                    Y = -150
                 },
                 new OsuSpriteText
                 {
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
-                    Text = "Tell us what osu! means to you for free goodies!",
+                    Text = "Sign up for our mailing list!",
                     TextSize = 48,
                     Y = 30
                 },
@@ -48,7 +48,7 @@ namespace osu.Game.Screens.AX
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Scale = new Vector2(0.85f),
+                    Scale = new Vector2(1.0f),
                     Y = 120,
                 }
             });
