@@ -2,6 +2,8 @@
 // Licensed under the MIT Licence - https://raw.githubusercontent.com/ppy/osu/master/LICENCE
 
 using OpenTK;
+using System;
+using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -11,6 +13,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
+
 
 namespace osu.Game.Screens.AX.Steps
 {
@@ -27,6 +30,8 @@ namespace osu.Game.Screens.AX.Steps
         private UserInputManager inputManager;
 
         private bool submitQueued;
+
+        private Drawable[] successDialogue;
 
         public LoginStep()
         {
@@ -56,6 +61,8 @@ namespace osu.Game.Screens.AX.Steps
                     TabbableContentContainer = this,
                     OnCommit = (t, n) => submit()
                     // TODO: optional, check format includes @ and .
+                    // [Ken] Checked email format validity in submit section below
+
                 },
                 progressContainer = new Container
                 {
@@ -86,6 +93,7 @@ namespace osu.Game.Screens.AX.Steps
                 }
             });
         }
+
 
         //[BackgroundDependencyLoader(permitNulls: true)]
         //private void load(APIAccess api, UserInputManager inputManager)
@@ -160,12 +168,62 @@ namespace osu.Game.Screens.AX.Steps
             if (string.IsNullOrEmpty(fullname.Text) || string.IsNullOrEmpty(email.Text))
                 return;
 
-            if (submitQueued)
-                return;
-            submitQueued = true;
+            //if (submitQueued)
+            //    return;
+            //submitQueued = true;
 
             // TODO: send to csv or something
             // TODO: make it do whatever SubmissionResultStep does, they use arrows in StepContainer and idk what it means
+            // [Ken] Just create a txt where submit constantly appends. We can just use Spreadsheat delimiter to make easy columns
+
+            if(validateEmail(email.Text))
+            {
+                string path = Environment.CurrentDirectory+"/subscribers.csv";
+                // Make file if it doesn't exist
+                if (!File.Exists(path))
+                {
+                    // Create a file to write to.
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        sw.WriteLine(fullname.Text + "," + email.Text);
+                    }
+                }
+                else
+                {
+                    // Append to file
+                    using (StreamWriter sw = File.AppendText(path))
+                    {
+                        sw.WriteLine(fullname.Text + "," + email.Text);
+                    }
+                }
+
+                fullname.Text = "";
+                email.Text = "";
+                email.PlaceholderText = "Email";
+
+                successSprite();
+                System.Threading.Thread success =
+                    new System.Threading.Thread(() =>
+                    {
+                        System.Threading.Thread.Sleep(3000);
+                        Remove(successDialogue);
+                    });
+                success.Start();
+            }
+            else
+            {
+                email.Text = "";
+                email.PlaceholderText = "Please enter valid email";
+                successSprite("Invalid email, please try again");
+                System.Threading.Thread invalid =
+                    new System.Threading.Thread(() =>
+                    {
+                        System.Threading.Thread.Sleep(1500);
+                        Remove(successDialogue);
+                    });
+                invalid.Start();
+            }
+
         }
 
         public override bool Contains(Vector2 screenSpacePos) => true;
@@ -175,5 +233,39 @@ namespace osu.Game.Screens.AX.Steps
         protected override bool OnClick(InputState state) => true;
 
         protected override void OnFocus(InputState state) => Schedule(() => inputManager?.ChangeFocus(string.IsNullOrEmpty(fullname.Text) ? fullname : email));
+
+        // Helper functions
+        bool validateEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        void successSprite(String text="Success, thank you for subscribing!")
+        {
+            // try adding timer? idk
+            successDialogue = new Drawable[] {
+                new OsuSpriteText
+                {
+                    Anchor = Anchor.TopCentre,
+                    Origin = Anchor.TopCentre,
+                    Text = text,
+                    TextSize = 36,
+                    Y = 30
+                }};
+            Add(successDialogue);
+        }
+
+        void disposeSuccessDialogue()
+        {
+            Remove(successDialogue);
+        }
     }
 }
